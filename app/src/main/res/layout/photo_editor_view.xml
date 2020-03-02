@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout">
+
+    <ja.burhanrashid52.photoeditor.PhotoEditorView
+        android:id="@+id/photoEditorView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <com.fenchtose.nocropper.CropperView
+        android:id="@+id/cropper_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#ff282828"
+        android:visibility="gone"
+        app:nocropper__grid_color="@color/colorAccent"
+        app:nocropper__grid_opacity="0.8"
+        app:nocropper__grid_thickness="0.8dp"
+        app:nocropper__padding_color="#ff282828" />
+
+    <include layout="@layout/item_add_text" />
+
+</merge>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="medium_icon_size">40dp</dimen>
+    <dimen name="small_icon_size">30dp</dimen>
+    <dimen name="preset_size">100dp</dimen>
+    <dimen name="my_picture_size">80dp</dimen>
+</resources>
