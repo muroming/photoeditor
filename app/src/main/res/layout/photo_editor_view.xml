@@ -7,19 +7,31 @@
     <ja.burhanrashid52.photoeditor.PhotoEditorView
         android:id="@+id/photoEditorView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="0dp"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintBottom_toTopOf="@id/glEditorActions"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <com.fenchtose.nocropper.CropperView
         android:id="@+id/cropper_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
         android:background="#ff282828"
         android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/photoEditorView"
+        app:layout_constraintTop_toTopOf="parent"
         app:nocropper__grid_color="@color/colorAccent"
         app:nocropper__grid_opacity="0.8"
         app:nocropper__grid_thickness="0.8dp"
         app:nocropper__padding_color="#ff282828" />
 
     <include layout="@layout/item_add_text" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/glEditorActions"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent=".8" />
 
 </merge>

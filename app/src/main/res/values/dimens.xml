@@ -5,4 +5,6 @@
     <dimen name="small_icon_size">40dp</dimen>
     <dimen name="preset_size">100dp</dimen>
     <dimen name="my_picture_size">80dp</dimen>
+
+    <dimen name="editor_actions_margin">4dp</dimen>
 </resources>
