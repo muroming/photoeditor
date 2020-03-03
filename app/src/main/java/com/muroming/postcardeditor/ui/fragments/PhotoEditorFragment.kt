@@ -1,9 +1,7 @@
 package com.muroming.postcardeditor.ui.fragments
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.observe
@@ -15,7 +13,7 @@ import ja.burhanrashid52.photoeditor.PhotoEditor
 import kotlinx.android.synthetic.main.fragment_editor.*
 import kotlinx.android.synthetic.main.photo_editor_view.*
 
-class PhotoEditorFragment : Fragment() {
+class PhotoEditorFragment : Fragment(R.layout.fragment_editor) {
     private lateinit var photoEditor: PhotoEditor
     private val viewModel: PhotoEditorViewModel by viewModels()
 
@@ -23,18 +21,11 @@ class PhotoEditorFragment : Fragment() {
         UserPicturesAdapter(requireContext(), R.layout.item_user_big_picture)
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_editor, container, false)
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initPhotoEditor()
         initPresetsRecycler()
+        initListeners()
 
         viewModel.loadUserPictures(requireContext().filesDir)
         viewModel.observeUserPictures().observe(this, vUserPictures::update)
@@ -53,6 +44,10 @@ class PhotoEditorFragment : Fragment() {
             layoutManager = GridLayoutManager(requireContext(), 3)
             adapter = presetsAdapter
         }
+    }
+
+    private fun initListeners() {
+        ivBack.setOnClickListener { activity?.onBackPressed() }
     }
 
     private fun updatePresets(presets: List<UserPicture>) {

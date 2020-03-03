@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.LayoutRes
 import androidx.recyclerview.widget.RecyclerView
-import com.muroming.postcardeditor.R
 import com.muroming.postcardeditor.data.UserPicture
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.item_user_medium_picture.view.*
@@ -41,7 +40,7 @@ class UserPicturesAdapter(
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         fun bind(userPicture: UserPicture) {
             with(itemView) {
-                picasso.load("https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Silver_medal_icon.svg/1024px-Silver_medal_icon.svg.png")
+                picasso.load(userPicture.uri)
                     .into(ivUserPicture)
             }
         }

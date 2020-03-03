@@ -3,7 +3,6 @@ package com.muroming.postcardeditor.ui.fragments
 import android.content.ContentResolver
 import android.content.res.Resources
 import android.net.Uri
-import androidx.core.net.toUri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -25,7 +24,7 @@ class PhotoEditorViewModel : ViewModel() {
 //            .map {
 //                UserPicture(it.toUri())
 //            }
-        List(USER_PICTURES_COUNT) { UserPicture(Uri.parse("android.resource://com.muroming.postcardeditor/drawable/ic_add_circle")) }
+        List(USER_PICTURES_COUNT) { UserPicture(Uri.parse("https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Silver_medal_icon.svg/1024px-Silver_medal_icon.svg.png")) }
             .let(userPictures::setValue)
     }
 
@@ -47,7 +46,7 @@ class PhotoEditorViewModel : ViewModel() {
                 )
             )
         }
-            .let(userPictures::setValue)
+            .let(presets::setValue)
     }
 
     companion object {

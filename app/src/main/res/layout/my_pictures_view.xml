@@ -8,16 +8,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
-        android:layout_marginBottom="12dp"
         android:text="@string/my_pictures"
         android:textColor="@color/black"
         android:textSize="16sp" />
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvUserPictures"
-        android:layout_width="match_parent"
-        android:layout_height="80dp"
-        android:layout_below="@id/tvMyPictures" />
 
     <TextView
         android:id="@+id/tvAllPictures"
@@ -36,5 +29,12 @@
         android:layout_width="@dimen/medium_icon_size"
         android:layout_height="@dimen/medium_icon_size"
         android:layout_alignParentEnd="true"
-        android:src="@drawable/ic_add_circle" />
+        android:src="@drawable/ic_open_file" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvUserPictures"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:layout_below="@id/ivAllPictures"
+        android:layout_marginTop="12dp" />
 </merge>

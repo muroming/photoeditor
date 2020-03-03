@@ -4,13 +4,26 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingStart="8dp"
+    android:paddingTop="4dp"
     android:paddingEnd="8dp">
+
+    <ImageView
+        android:id="@+id/ivBack"
+        android:layout_width="@dimen/medium_icon_size"
+        android:layout_height="@dimen/medium_icon_size"
+        android:src="@drawable/ic_back"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvHeaderIcons"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="4dp"
+        app:layout_constraintBottom_toBottomOf="@id/ivBack"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/ivBack"
+        app:layout_constraintTop_toTopOf="@id/ivBack" />
 
     <com.muroming.postcardeditor.ui.views.mypictures.UserPicturesView
         android:id="@+id/vUserPictures"
@@ -24,9 +37,9 @@
         android:layout_width="@dimen/medium_icon_size"
         android:layout_height="@dimen/medium_icon_size"
         android:layout_marginTop="6dp"
+        android:src="@drawable/ic_presets"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/vUserPictures"
-        android:src="@drawable/ic_add_circle" />
+        app:layout_constraintTop_toBottomOf="@id/vUserPictures" />
 
     <TextView
         android:id="@+id/tvPresets"
