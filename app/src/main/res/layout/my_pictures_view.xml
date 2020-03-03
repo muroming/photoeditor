@@ -36,5 +36,5 @@
         android:layout_width="@dimen/medium_icon_size"
         android:layout_height="@dimen/medium_icon_size"
         android:layout_alignParentEnd="true"
-        tools:src="#f00" />
+        android:src="@drawable/ic_add_circle" />
 </merge>

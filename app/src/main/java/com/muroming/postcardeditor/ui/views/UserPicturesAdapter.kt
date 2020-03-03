@@ -1,23 +1,27 @@
-package com.muroming.postcardeditor.ui.views.mypictures
+package com.muroming.postcardeditor.ui.views
 
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.LayoutRes
 import androidx.recyclerview.widget.RecyclerView
 import com.muroming.postcardeditor.R
 import com.muroming.postcardeditor.data.UserPicture
 import com.squareup.picasso.Picasso
-import kotlinx.android.synthetic.main.item_user_picture.view.*
+import kotlinx.android.synthetic.main.item_user_medium_picture.view.*
 
-class UserPicturesAdapter(context: Context) : RecyclerView.Adapter<UserPicturesAdapter.ViewHolder>() {
+class UserPicturesAdapter(
+    context: Context,
+    @LayoutRes private val pictureLayout: Int
+) : RecyclerView.Adapter<UserPicturesAdapter.ViewHolder>() {
 
     private val picasso = Picasso.get()
     private val items: MutableList<UserPicture> = mutableListOf()
     private val inflater = LayoutInflater.from(context)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = inflater.inflate(R.layout.item_user_picture, parent, false)
+        val view = inflater.inflate(pictureLayout, parent, false)
         return ViewHolder(view)
     }
 
@@ -37,7 +41,7 @@ class UserPicturesAdapter(context: Context) : RecyclerView.Adapter<UserPicturesA
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         fun bind(userPicture: UserPicture) {
             with(itemView) {
-                picasso.load(userPicture.uri)
+                picasso.load("https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Silver_medal_icon.svg/1024px-Silver_medal_icon.svg.png")
                     .into(ivUserPicture)
             }
         }
