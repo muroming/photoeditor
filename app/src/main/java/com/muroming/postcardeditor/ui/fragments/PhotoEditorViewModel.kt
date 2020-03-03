@@ -13,6 +13,7 @@ import java.io.File
 class PhotoEditorViewModel : ViewModel() {
     private val userPictures = MutableLiveData<List<UserPicture>>()
     private val presets = MutableLiveData<List<UserPicture>>()
+    var editorState = EditorState.PRESETS
 
     fun observeUserPictures(): LiveData<List<UserPicture>> = userPictures
     fun observerPresets(): LiveData<List<UserPicture>> = presets

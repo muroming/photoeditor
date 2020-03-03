@@ -27,6 +27,7 @@ class UserPicturesView @JvmOverloads constructor(
     }
 
     private fun initListeners() {
+
     }
 
     private fun initAdapter() {

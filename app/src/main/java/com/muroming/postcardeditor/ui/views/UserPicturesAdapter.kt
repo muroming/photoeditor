@@ -1,6 +1,7 @@
 package com.muroming.postcardeditor.ui.views
 
 import android.content.Context
+import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,7 +13,8 @@ import kotlinx.android.synthetic.main.item_user_medium_picture.view.*
 
 class UserPicturesAdapter(
     context: Context,
-    @LayoutRes private val pictureLayout: Int
+    @LayoutRes private val pictureLayout: Int,
+    private val onPictureClicked: (Uri) -> Unit = {}
 ) : RecyclerView.Adapter<UserPicturesAdapter.ViewHolder>() {
 
     private val picasso = Picasso.get()
@@ -42,6 +44,7 @@ class UserPicturesAdapter(
             with(itemView) {
                 picasso.load(userPicture.uri)
                     .into(ivUserPicture)
+                setOnClickListener { onPictureClicked(userPicture.uri) }
             }
         }
     }
