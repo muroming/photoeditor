@@ -27,6 +27,27 @@
 
     <include layout="@layout/item_add_text" />
 
+    <ImageView
+        android:id="@+id/ivBrushSize"
+        android:layout_width="@dimen/max_brush_size"
+        android:layout_height="@dimen/max_brush_size"
+        android:alpha="0"
+        android:clickable="false"
+        android:src="@drawable/ic_brush_size"
+        app:layout_constraintBottom_toTopOf="@id/vSlider"
+        app:layout_goneMarginBottom="48dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/photoEditorView" />
+
+    <SeekBar
+        android:id="@+id/vSlider"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/small_icon_size"
+        android:layout_margin="8dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/glEditorActions" />
+
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/glEditorActions"
         android:layout_width="wrap_content"

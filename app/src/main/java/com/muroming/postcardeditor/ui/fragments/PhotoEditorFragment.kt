@@ -69,6 +69,7 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor), OnBackPressedLis
     private fun showPresets() {
         rvPresets.visibility = View.VISIBLE
         vPhotoEditor.visibility = View.GONE
+        vPhotoEditor.clearEditor()
         viewModel.editorState = EditorState.PRESETS
     }
 
