@@ -2,6 +2,7 @@
 <resources>
     <dimen name="big_icon_size">70dp</dimen>
     <dimen name="medium_icon_size">50dp</dimen>
+    <dimen name="user_pictures_size">65dp</dimen>
     <dimen name="small_icon_size">40dp</dimen>
     <dimen name="preset_size">100dp</dimen>
     <dimen name="my_picture_size">80dp</dimen>

@@ -29,7 +29,7 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor), OnBackPressedLis
         initPresetsRecycler()
         initListeners()
 
-        viewModel.loadUserPictures(requireContext().filesDir)
+        viewModel.loadUserPictures(resources)
         viewModel.observeUserPictures().observe(this, vUserPictures::update)
 
         viewModel.loadPresets(resources)
@@ -59,16 +59,21 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor), OnBackPressedLis
 
     private fun showEditor(uri: Uri) {
         rvPresets.visibility = View.GONE
+        mockIcons.visibility = View.INVISIBLE
+        editorMockIcons.visibility = View.VISIBLE
         Picasso.get()
             .load(uri)
             .into(photoEditorView.source)
         vPhotoEditor.visibility = View.VISIBLE
+        vPhotoEditor.initEditor()
         viewModel.editorState = EditorState.EDITING
     }
 
     private fun showPresets() {
         rvPresets.visibility = View.VISIBLE
         vPhotoEditor.visibility = View.GONE
+        mockIcons.visibility = View.VISIBLE
+        editorMockIcons.visibility = View.INVISIBLE
         vPhotoEditor.clearEditor()
         viewModel.editorState = EditorState.PRESETS
     }
