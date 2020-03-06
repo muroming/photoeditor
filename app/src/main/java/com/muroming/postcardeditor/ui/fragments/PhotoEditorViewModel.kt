@@ -12,10 +12,13 @@ import com.muroming.postcardeditor.data.UserPicture
 class PhotoEditorViewModel : ViewModel() {
     private val userPictures = MutableLiveData<List<UserPicture>>()
     private val presets = MutableLiveData<List<UserPicture>>()
-    var editorState = EditorState.PRESETS
+    private val editorState = MutableLiveData<EditorState>(EditorState.PRESETS)
 
     fun observeUserPictures(): LiveData<List<UserPicture>> = userPictures
-    fun observerPresets(): LiveData<List<UserPicture>> = presets
+    fun observePresets(): LiveData<List<UserPicture>> = presets
+    fun observeEditorState(): LiveData<EditorState> = editorState
+
+    fun getEditorState() = editorState.value
 
     fun loadUserPictures(resources: Resources) {
 //        directory
@@ -55,6 +58,14 @@ class PhotoEditorViewModel : ViewModel() {
             )
         }
             .let(presets::setValue)
+    }
+
+    fun onPresetClicked() {
+        editorState.value = EditorState.EDITING
+    }
+
+    fun onBackFromEditingClicked() {
+        editorState.value = EditorState.PRESETS
     }
 
     companion object {

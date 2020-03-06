@@ -10,22 +10,19 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.muroming.postcardeditor.R
 import com.muroming.postcardeditor.data.UserPicture
 import com.muroming.postcardeditor.ui.views.UserPicturesAdapter
-import com.squareup.picasso.Picasso
 import ja.burhanrashid52.photoeditor.PhotoEditor
 import kotlinx.android.synthetic.main.fragment_editor.*
 import kotlinx.android.synthetic.main.photo_editor_view.*
 
 class PhotoEditorFragment : Fragment(R.layout.fragment_editor), OnBackPressedListener {
-    private lateinit var photoEditor: PhotoEditor
     private val viewModel: PhotoEditorViewModel by viewModels()
 
     private val presetsAdapter: UserPicturesAdapter by lazy {
-        UserPicturesAdapter(requireContext(), R.layout.item_user_big_picture, ::showEditor)
+        UserPicturesAdapter(requireContext(), R.layout.item_user_big_picture, ::onPresetClicked)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initPhotoEditor()
         initPresetsRecycler()
         initListeners()
 
@@ -33,12 +30,9 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor), OnBackPressedLis
         viewModel.observeUserPictures().observe(this, vUserPictures::update)
 
         viewModel.loadPresets(resources)
-        viewModel.observerPresets().observe(this, ::updatePresets)
-    }
+        viewModel.observePresets().observe(this, ::updatePresets)
+        viewModel.observeEditorState().observe(this, ::onEditorStateChanged)
 
-    private fun initPhotoEditor() {
-        photoEditor = PhotoEditor.Builder(requireContext(), photoEditorView)
-            .build()
     }
 
     private fun initPresetsRecycler() {
@@ -57,30 +51,36 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor), OnBackPressedLis
         presetsAdapter.notifyDataSetChanged()
     }
 
-    private fun showEditor(uri: Uri) {
+    private fun onPresetClicked(uri: Uri) {
+        vPhotoEditor.initEditor(uri)
+        viewModel.onPresetClicked()
+    }
+
+    private fun showEditor() {
         rvPresets.visibility = View.GONE
         mockIcons.visibility = View.INVISIBLE
         editorMockIcons.visibility = View.VISIBLE
-        Picasso.get()
-            .load(uri)
-            .into(photoEditorView.source)
         vPhotoEditor.visibility = View.VISIBLE
-        vPhotoEditor.initEditor()
-        viewModel.editorState = EditorState.EDITING
     }
 
     private fun showPresets() {
+        vPhotoEditor.clearEditor()
         rvPresets.visibility = View.VISIBLE
         vPhotoEditor.visibility = View.GONE
         mockIcons.visibility = View.VISIBLE
         editorMockIcons.visibility = View.INVISIBLE
-        vPhotoEditor.clearEditor()
-        viewModel.editorState = EditorState.PRESETS
     }
 
-    override fun onBackPressed(): Boolean = when (viewModel.editorState) {
+    private fun onEditorStateChanged(editorState: EditorState) {
+        when(editorState) {
+            EditorState.PRESETS -> showPresets()
+            EditorState.EDITING -> showEditor()
+        }
+    }
+
+    override fun onBackPressed(): Boolean = when (viewModel.getEditorState()) {
         EditorState.EDITING -> {
-            showPresets()
+            viewModel.onBackFromEditingClicked()
             true
         }
         else -> false

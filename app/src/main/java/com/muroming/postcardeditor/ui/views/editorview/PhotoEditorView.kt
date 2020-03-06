@@ -3,6 +3,7 @@ package com.muroming.postcardeditor.ui.views.editorview
 import android.content.Context
 import android.graphics.Color
 import android.graphics.PorterDuff
+import android.net.Uri
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
@@ -14,6 +15,7 @@ import com.muroming.postcardeditor.R
 import com.muroming.postcardeditor.utils.getFocusWithKeyboard
 import com.muroming.postcardeditor.utils.setSize
 import com.muroming.postcardeditor.utils.setVisibility
+import com.squareup.picasso.Picasso
 import ja.burhanrashid52.photoeditor.PhotoEditor
 import kotlinx.android.synthetic.main.photo_editor_view.view.*
 
@@ -46,11 +48,18 @@ class PhotoEditorView @JvmOverloads constructor(
 
     init {
         LayoutInflater.from(context).inflate(R.layout.photo_editor_view, this, true)
+        initPhotoEditor()
     }
 
-    fun initEditor() {
+    fun initEditor(uri: Uri) {
+        loadPicture(uri)
         initActions()
-        initPhotoEditor()
+    }
+
+    private fun loadPicture(uri: Uri) {
+        Picasso.get()
+            .load(uri)
+            .into(photoEditorView.source)
     }
 
     private fun initActions() {
@@ -128,7 +137,7 @@ class PhotoEditorView @JvmOverloads constructor(
             }
         })
 
-        flInputTextHolder.setOnClickListener { hideTextInputAndInstantiateText() }
+        vInputTextBackground.setOnClickListener { hideTextInputAndInstantiateText() }
     }
 
     fun clearEditor() {
@@ -140,7 +149,7 @@ class PhotoEditorView @JvmOverloads constructor(
     }
 
     private fun onAddTextClicked(view: ImageView) {
-        flInputTextHolder.setVisibility(true)
+        textAddingGroup.setVisibility(true)
         etTextInput.getFocusWithKeyboard(inputMethodManager)
     }
 
@@ -194,7 +203,7 @@ class PhotoEditorView @JvmOverloads constructor(
         if (text.isNotEmpty()) {
             photoEditor.addText(text, null)
         }
-        flInputTextHolder.setVisibility(false)
+        textAddingGroup.setVisibility(false)
         etTextInput.setText("")
         inputMethodManager.hideSoftInputFromWindow(windowToken, 0)
     }

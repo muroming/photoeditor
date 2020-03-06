@@ -26,24 +26,52 @@
         app:nocropper__padding_color="#ff282828" />
 
 
-    <FrameLayout
-        android:id="@+id/flInputTextHolder"
+    <View
+        android:id="@+id/vInputTextBackground"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:background="#77000000"
-        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@id/photoEditorView"
-        app:layout_constraintTop_toTopOf="@id/photoEditorView">
+        app:layout_constraintTop_toTopOf="@id/photoEditorView" />
 
-        <EditText
-            android:id="@+id/etTextInput"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:background="@null"
-            android:minWidth="200dp" />
+    <EditText
+        android:id="@+id/etTextInput"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@null"
+        android:minWidth="200dp"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toBottomOf="@id/vInputTextBackground"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/vInputTextBackground" />
 
-    </FrameLayout>
+    <ImageView
+        android:id="@+id/ivTextToLeft"
+        android:layout_width="@dimen/small_icon_size"
+        android:layout_height="@dimen/small_icon_size"
+        android:layout_margin="8dp"
+        android:background="#f00"
+        app:layout_constraintBottom_toBottomOf="@id/vInputTextBackground"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageView
+        android:id="@+id/ivTextToCenter"
+        android:layout_width="@dimen/small_icon_size"
+        android:layout_height="@dimen/small_icon_size"
+        android:layout_margin="8dp"
+        android:background="#f00"
+        app:layout_constraintBottom_toBottomOf="@id/vInputTextBackground"
+        app:layout_constraintStart_toEndOf="@id/ivTextToLeft" />
+
+    <ImageView
+        android:id="@+id/ivTextToRight"
+        android:layout_width="@dimen/small_icon_size"
+        android:layout_height="@dimen/small_icon_size"
+        android:layout_margin="8dp"
+        android:background="#f00"
+        app:layout_constraintBottom_toBottomOf="@id/vInputTextBackground"
+        app:layout_constraintStart_toEndOf="@id/ivTextToCenter" />
 
     <ImageView
         android:id="@+id/ivBrushSize"
@@ -57,6 +85,13 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/photoEditorView"
         app:layout_goneMarginBottom="48dp" />
+
+    <androidx.constraintlayout.widget.Group
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:id="@+id/textAddingGroup"
+        android:visibility="gone"
+        app:constraint_referenced_ids="etTextInput,vInputTextBackground,ivTextToLeft,ivTextToCenter,ivTextToRight" />
 
     <SeekBar
         android:id="@+id/vSlider"
