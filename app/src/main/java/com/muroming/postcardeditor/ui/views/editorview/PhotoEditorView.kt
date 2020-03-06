@@ -5,18 +5,22 @@ import android.graphics.Color
 import android.graphics.PorterDuff
 import android.net.Uri
 import android.util.AttributeSet
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
 import android.widget.SeekBar
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.fragment.app.FragmentManager
 import com.muroming.postcardeditor.R
 import com.muroming.postcardeditor.utils.getFocusWithKeyboard
 import com.muroming.postcardeditor.utils.setSize
 import com.muroming.postcardeditor.utils.setVisibility
 import com.squareup.picasso.Picasso
+import dev.sasikanth.colorsheet.ColorSheet
 import ja.burhanrashid52.photoeditor.PhotoEditor
+import ja.burhanrashid52.photoeditor.TextStyleBuilder
 import kotlinx.android.synthetic.main.photo_editor_view.view.*
 
 class PhotoEditorView @JvmOverloads constructor(
@@ -24,6 +28,8 @@ class PhotoEditorView @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : ConstraintLayout(context, attrs, defStyleAttr) {
+
+    lateinit var fragmentManager: FragmentManager
 
     private lateinit var photoEditor: PhotoEditor
     private val maxBrushSize = resources.getDimensionPixelSize(R.dimen.max_brush_size)
@@ -33,6 +39,9 @@ class PhotoEditorView @JvmOverloads constructor(
     private var isDrawing = false
     private val inputMethodManager: InputMethodManager =
         context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+
+    private lateinit var colorPalette: IntArray
+    private var selectedColor = -1
 
     private val editorActions: Map<Int, (ImageView) -> Unit> = mapOf(
         R.drawable.ic_add_text to ::onAddTextClicked,
@@ -54,6 +63,8 @@ class PhotoEditorView @JvmOverloads constructor(
     fun initEditor(uri: Uri) {
         loadPicture(uri)
         initActions()
+        initListeners()
+        initColorPalette()
     }
 
     private fun loadPicture(uri: Uri) {
@@ -97,6 +108,19 @@ class PhotoEditorView @JvmOverloads constructor(
             currId = nextId
             nextId = View.generateViewId()
         }
+    }
+
+    private fun initListeners() {
+        ivTextToLeft.setOnClickListener { etTextInput.gravity = Gravity.LEFT }
+        ivTextToRight.setOnClickListener { etTextInput.gravity = Gravity.RIGHT }
+        ivTextToCenter.setOnClickListener { etTextInput.gravity = Gravity.CENTER }
+    }
+
+    private fun initColorPalette() {
+        colorPalette = resources.getIntArray(R.array.paletteColors)
+        selectedColor = colorPalette.first()
+        photoEditor.brushColor = selectedColor
+        photoEditor.setBrushDrawingMode(false)
     }
 
     private fun initPhotoEditor() {
@@ -154,7 +178,15 @@ class PhotoEditorView @JvmOverloads constructor(
     }
 
     private fun onPaletteClicked(view: ImageView) {
-
+        ColorSheet().colorPicker(
+            colors = colorPalette,
+            selectedColor = selectedColor,
+            noColorOption = false
+        ) { newColor ->
+            selectedColor = newColor
+            photoEditor.brushColor = selectedColor
+            photoEditor.setBrushDrawingMode(isDrawing)
+        }.show(fragmentManager)
     }
 
     private fun onBrushClicked(view: ImageView) {
@@ -178,13 +210,9 @@ class PhotoEditorView @JvmOverloads constructor(
 
     }
 
-    private fun onFrameClicked(view: ImageView) {
+    private fun onFrameClicked(view: ImageView) {}
 
-    }
-
-    private fun onWandClicked(view: ImageView) {
-
-    }
+    private fun onWandClicked(view: ImageView) {}
 
     private fun onEraserClicked(view: ImageView) {
         isErasing = !isErasing
@@ -200,11 +228,22 @@ class PhotoEditorView @JvmOverloads constructor(
 
     private fun hideTextInputAndInstantiateText() {
         val text = etTextInput.text.toString()
+        val gravity = etTextInput.gravity
         if (text.isNotEmpty()) {
-            photoEditor.addText(text, null)
+            val textStyle = TextStyleBuilder().apply {
+                withGravity(gravity)
+            }
+            photoEditor.addText(text, textStyle)
         }
+        resetInputText()
+    }
+
+    private fun resetInputText() {
         textAddingGroup.setVisibility(false)
-        etTextInput.setText("")
+        etTextInput.apply {
+            setText("")
+            gravity = Gravity.LEFT
+        }
         inputMethodManager.hideSoftInputFromWindow(windowToken, 0)
     }
 

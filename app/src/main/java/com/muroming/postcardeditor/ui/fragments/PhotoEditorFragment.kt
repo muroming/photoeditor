@@ -10,9 +10,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.muroming.postcardeditor.R
 import com.muroming.postcardeditor.data.UserPicture
 import com.muroming.postcardeditor.ui.views.UserPicturesAdapter
-import ja.burhanrashid52.photoeditor.PhotoEditor
 import kotlinx.android.synthetic.main.fragment_editor.*
-import kotlinx.android.synthetic.main.photo_editor_view.*
 
 class PhotoEditorFragment : Fragment(R.layout.fragment_editor), OnBackPressedListener {
     private val viewModel: PhotoEditorViewModel by viewModels()
@@ -32,6 +30,8 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor), OnBackPressedLis
         viewModel.loadPresets(resources)
         viewModel.observePresets().observe(this, ::updatePresets)
         viewModel.observeEditorState().observe(this, ::onEditorStateChanged)
+
+        vPhotoEditor.fragmentManager = childFragmentManager
 
     }
 
