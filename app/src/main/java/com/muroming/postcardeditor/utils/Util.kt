@@ -1,11 +1,14 @@
 package com.muroming.postcardeditor.utils
 
 import android.content.Context
+import android.content.res.Resources
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
+
+fun Float.toSp() = this / Resources.getSystem().displayMetrics.scaledDensity
 
 
 fun Context.getCompatColor(@ColorRes color: Int) = ContextCompat.getColor(this, color)
@@ -22,6 +25,6 @@ fun View.setVisibility(isVisible: Boolean) {
 }
 
 fun EditText.getFocusWithKeyboard(inputManger: InputMethodManager) {
+    inputManger.showSoftInput(this, InputMethodManager.SHOW_FORCED)
     requestFocus()
-    inputManger.showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
 }

@@ -23,7 +23,7 @@
         app:nocropper__grid_color="@color/colorAccent"
         app:nocropper__grid_opacity="0.8"
         app:nocropper__grid_thickness="0.8dp"
-        app:nocropper__padding_color="#ff282828" />
+        app:nocropper__padding_color="@android:color/transparent" />
 
 
     <View
@@ -40,7 +40,7 @@
         android:layout_height="wrap_content"
         android:background="@null"
         android:minWidth="200dp"
-        android:textSize="20sp"
+        android:textSize="@dimen/min_text_size"
         app:layout_constraintBottom_toBottomOf="@id/vInputTextBackground"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -98,24 +98,39 @@
         android:alpha="0"
         android:clickable="false"
         android:src="@drawable/ic_brush_size"
-        app:layout_constraintBottom_toTopOf="@id/vSlider"
+        app:layout_constraintBottom_toTopOf="@id/vBrushSlider"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/photoEditorView"
         app:layout_goneMarginBottom="48dp" />
 
+    <SeekBar
+        android:id="@+id/vTextSizeSlider"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/small_icon_size"
+        android:layout_margin="4dp"
+        android:background="@color/dark_blue"
+        android:progressTint="@color/white"
+        android:thumbTint="@color/white"
+        app:layout_constraintBottom_toBottomOf="@id/ivTextToRight"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/ivTextToRight" />
+
     <androidx.constraintlayout.widget.Group
+        android:id="@+id/textAddingGroup"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:id="@+id/textAddingGroup"
         android:visibility="gone"
-        app:constraint_referenced_ids="etTextInput,vInputTextBackground,ivTextToLeft,ivTextToCenter,ivTextToRight,ivBoldText,ivItalicText" />
+        app:constraint_referenced_ids="etTextInput,vInputTextBackground,ivTextToLeft,ivTextToCenter,ivTextToRight,ivBoldText,ivItalicText,vTextSizeSlider" />
 
     <SeekBar
-        android:id="@+id/vSlider"
+        android:id="@+id/vBrushSlider"
         android:layout_width="match_parent"
         android:layout_height="@dimen/small_icon_size"
         android:layout_margin="8dp"
+        android:background="@color/dark_blue"
+        android:progressTint="@color/white"
+        android:thumbTint="@color/white"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@id/glEditorActions" />
 

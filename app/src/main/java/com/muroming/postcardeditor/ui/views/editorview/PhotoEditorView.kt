@@ -3,6 +3,7 @@ package com.muroming.postcardeditor.ui.views.editorview
 import android.content.Context
 import android.graphics.Color
 import android.graphics.PorterDuff
+import android.graphics.Typeface
 import android.net.Uri
 import android.util.AttributeSet
 import android.view.Gravity
@@ -17,6 +18,7 @@ import com.muroming.postcardeditor.R
 import com.muroming.postcardeditor.utils.getFocusWithKeyboard
 import com.muroming.postcardeditor.utils.setSize
 import com.muroming.postcardeditor.utils.setVisibility
+import com.muroming.postcardeditor.utils.toSp
 import com.squareup.picasso.Picasso
 import dev.sasikanth.colorsheet.ColorSheet
 import ja.burhanrashid52.photoeditor.PhotoEditor
@@ -32,11 +34,17 @@ class PhotoEditorView @JvmOverloads constructor(
     lateinit var fragmentManager: FragmentManager
 
     private lateinit var photoEditor: PhotoEditor
-    private val maxBrushSize = resources.getDimensionPixelSize(R.dimen.max_brush_size)
     private val minBrushSize = resources.getDimensionPixelSize(R.dimen.min_brush_size)
+    private val maxBrushSize = resources.getDimensionPixelSize(R.dimen.max_brush_size)
 
     private var isErasing = false
     private var isDrawing = false
+
+    private var isTextBold = false
+    private var isTextItalic = false
+    private val minTextSize = resources.getDimensionPixelSize(R.dimen.min_text_size)
+    private val maxTextSize = resources.getDimensionPixelSize(R.dimen.max_text_size)
+
     private val inputMethodManager: InputMethodManager =
         context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
 
@@ -63,7 +71,7 @@ class PhotoEditorView @JvmOverloads constructor(
     fun initEditor(uri: Uri) {
         loadPicture(uri)
         initActions()
-        initListeners()
+        initTextControls()
         initColorPalette()
     }
 
@@ -110,10 +118,25 @@ class PhotoEditorView @JvmOverloads constructor(
         }
     }
 
-    private fun initListeners() {
+    private fun initTextControls() {
         ivTextToLeft.setOnClickListener { etTextInput.gravity = Gravity.LEFT }
         ivTextToRight.setOnClickListener { etTextInput.gravity = Gravity.RIGHT }
         ivTextToCenter.setOnClickListener { etTextInput.gravity = Gravity.CENTER }
+        ivBoldText.setOnClickListener { setInputTextBold() }
+        ivItalicText.setOnClickListener { setInputTextItalic() }
+        vInputTextBackground.setOnClickListener { hideTextInputAndInstantiateText() }
+        vTextSizeSlider.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                seekBar?.takeIf { fromUser }?.let {
+                    etTextInput.textSize =
+                        minTextSize + (progress.toFloat() / 100) * (maxTextSize - minTextSize)
+                }
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+        })
     }
 
     private fun initColorPalette() {
@@ -131,7 +154,7 @@ class PhotoEditorView @JvmOverloads constructor(
         photoEditor.brushColor = Color.parseColor("#ff0000")
         photoEditor.setBrushDrawingMode(false)
 
-        vSlider.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+        vBrushSlider.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 seekBar?.takeIf { fromUser }?.let {
                     val newSize =
@@ -160,21 +183,24 @@ class PhotoEditorView @JvmOverloads constructor(
                     .start()
             }
         })
-
-        vInputTextBackground.setOnClickListener { hideTextInputAndInstantiateText() }
     }
 
     fun clearEditor() {
-        vSlider.setVisibility(false)
+        cropper_view.setVisibility(false)
+        photoEditorView.setVisibility(true)
+        vBrushSlider.setVisibility(false)
+
         photoEditor.clearAllViews()
         photoEditor.setBrushDrawingMode(false)
+
         isErasing = false
         isDrawing = false
+        isTextBold = false
+        isTextItalic = false
     }
 
     private fun onAddTextClicked(view: ImageView) {
-        textAddingGroup.setVisibility(true)
-        etTextInput.getFocusWithKeyboard(inputMethodManager)
+        setInputTextGroupVisibility(true)
     }
 
     private fun onPaletteClicked(view: ImageView) {
@@ -189,15 +215,6 @@ class PhotoEditorView @JvmOverloads constructor(
         }.show(fragmentManager)
     }
 
-    private fun onBrushClicked(view: ImageView) {
-        isDrawing = !isDrawing
-        isErasing = false
-
-        view.setColorFilter(if (isDrawing) SELECTED_ACTION_TINT else 0, PorterDuff.Mode.MULTIPLY)
-        vSlider.setVisibility(isDrawing)
-        photoEditor.setBrushDrawingMode(isDrawing)
-    }
-
     private fun onUndoClicked(view: ImageView) {
         photoEditor.undo()
     }
@@ -207,18 +224,33 @@ class PhotoEditorView @JvmOverloads constructor(
     }
 
     private fun onCropClicked(view: ImageView) {
-
+        TODO()
+//        val imageBitmap = photoEditorView.source.drawToBitmap()
+//        cropper_view.apply {
+//            setImageBitmap(imageBitmap)
+//            setVisibility(true)
+//        }
+//        photoEditorView.setVisibility(false)
     }
 
     private fun onFrameClicked(view: ImageView) {}
 
     private fun onWandClicked(view: ImageView) {}
 
+    private fun onBrushClicked(view: ImageView) {
+        isDrawing = !isDrawing
+        isErasing = false
+
+        view.setColorFilter(if (isDrawing) SELECTED_ACTION_TINT else 0, PorterDuff.Mode.MULTIPLY)
+        vBrushSlider.setVisibility(isDrawing)
+        photoEditor.setBrushDrawingMode(isDrawing)
+    }
+
     private fun onEraserClicked(view: ImageView) {
         isErasing = !isErasing
         isDrawing = false
 
-        vSlider.setVisibility(isErasing)
+        vBrushSlider.setVisibility(isErasing)
         if (isErasing) {
             photoEditor.brushEraser()
         } else {
@@ -232,24 +264,48 @@ class PhotoEditorView @JvmOverloads constructor(
         if (text.isNotEmpty()) {
             val textStyle = TextStyleBuilder().apply {
                 withGravity(gravity)
+                withTextSize(etTextInput.textSize.toSp())
+                withTextFont(etTextInput.typeface)
             }
             photoEditor.addText(text, textStyle)
         }
-        resetInputText()
+        setInputTextGroupVisibility(false)
     }
 
-    private fun resetInputText() {
-        textAddingGroup.setVisibility(false)
+    private fun setInputTextBold() {
+        isTextBold = !isTextBold
+        etTextInput.setTypeface(null, getTextStyle())
+    }
+
+    private fun setInputTextItalic() {
+        isTextItalic = !isTextItalic
+        etTextInput.setTypeface(null, getTextStyle())
+    }
+
+    private fun getTextStyle(): Int = if (isTextBold) {
+        if (isTextItalic) Typeface.BOLD_ITALIC else Typeface.BOLD
+    } else {
+        if (isTextItalic) Typeface.ITALIC else Typeface.NORMAL
+    }
+
+    private fun setInputTextGroupVisibility(isVisible: Boolean) {
+        textAddingGroup.setVisibility(isVisible)
         etTextInput.apply {
             setText("")
+            textSize = minTextSize.toFloat()
             gravity = Gravity.LEFT
+            setTypeface(null, Typeface.NORMAL)
         }
-        inputMethodManager.hideSoftInputFromWindow(windowToken, 0)
+        if (isVisible) {
+            etTextInput.getFocusWithKeyboard(inputMethodManager)
+        } else {
+            inputMethodManager.hideSoftInputFromWindow(windowToken, 0)
+        }
+        vBrushSlider.setVisibility(!isVisible && (isDrawing || isErasing))
     }
 
     companion object {
         private const val BRUSH_SIZE_ANIMATION_DURATION = 150L
-        private val SELECTED_ACTION_TINT =
-            Color.parseColor("#FF0000")//Color.parseColor("#FFD32F2F")
+        private val SELECTED_ACTION_TINT = Color.parseColor("#FFD32F2F")
     }
 }
