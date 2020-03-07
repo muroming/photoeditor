@@ -3,4 +3,9 @@
     <string name="my_pictures">Мои работы</string>
     <string name="all_pictures">Все</string>
     <string name="presets">Шаблоны</string>
+
+    <string name="editor_closing_warning">Все изменения будут утеряны, хотите сохранить?</string>
+    <string name="save_picture">Сохранить</string>
+    <string name="dont_save_picture">Не сохранять</string>
+    <string name="dismiss_dialog">Закрыть</string>
 </resources>

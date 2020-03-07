@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.muroming.postcardeditor.R
 import com.muroming.postcardeditor.data.UserPicture
+import java.io.File
 
 class PhotoEditorViewModel : ViewModel() {
     private val userPictures = MutableLiveData<List<UserPicture>>()
@@ -63,9 +64,17 @@ class PhotoEditorViewModel : ViewModel() {
     fun onPresetClicked() {
         editorState.value = EditorState.EDITING
     }
-
-    fun onBackFromEditingClicked() {
+    fun onSavingComplete() {
         editorState.value = EditorState.PRESETS
+    }
+
+    fun onSavingDialogDismissed(shouldCloseEditor: Boolean) {
+        editorState.value = if (shouldCloseEditor) EditorState.PRESETS else EditorState.EDITING
+    }
+
+    fun generateFilePath(directory: File): String {
+        val currentCount = directory.listFiles().size
+        return "${directory.path}/myPicture${currentCount}.png"
     }
 
     companion object {

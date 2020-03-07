@@ -199,6 +199,13 @@ class PhotoEditorView @JvmOverloads constructor(
         isTextItalic = false
     }
 
+    fun saveImage(filepath: String, onSuccess: (Boolean) -> Unit) {
+        photoEditor.saveAsFile(
+            filepath,
+            PhotoSaveListener({ onSuccess(true) }, { onSuccess(false) })
+        )
+    }
+
     private fun onAddTextClicked(view: ImageView) {
         setInputTextGroupVisibility(true)
     }

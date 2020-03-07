@@ -71,8 +71,23 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor), OnBackPressedLis
         editorMockIcons.visibility = View.INVISIBLE
     }
 
+    private fun showSavingDialog() {
+        SavePictureDialog(
+            {
+                vPhotoEditor.saveImage(
+                    viewModel.generateFilePath(requireContext().filesDir)
+                ) { isSuccessful ->
+                    if (isSuccessful) {
+                        viewModel.onSavingComplete()
+                    }
+                }
+            },
+            { shouldCloseEditor -> viewModel.onSavingDialogDismissed(shouldCloseEditor) }
+        ).show(childFragmentManager, SavePictureDialog.DIALOG_TAG)
+    }
+
     private fun onEditorStateChanged(editorState: EditorState) {
-        when(editorState) {
+        when (editorState) {
             EditorState.PRESETS -> showPresets()
             EditorState.EDITING -> showEditor()
         }
@@ -80,7 +95,7 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor), OnBackPressedLis
 
     override fun onBackPressed(): Boolean = when (viewModel.getEditorState()) {
         EditorState.EDITING -> {
-            viewModel.onBackFromEditingClicked()
+            showSavingDialog()
             true
         }
         else -> false
