@@ -1,6 +1,7 @@
 package com.muroming.postcardeditor.ui.views.editorview
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.Typeface
@@ -69,16 +70,17 @@ class PhotoEditorView @JvmOverloads constructor(
     }
 
     fun initEditor(uri: Uri) {
-        loadPicture(uri)
+        Picasso.get().load(uri).into(photoEditorView.source)
         initActions()
         initTextControls()
         initColorPalette()
     }
 
-    private fun loadPicture(uri: Uri) {
-        Picasso.get()
-            .load(uri)
-            .into(photoEditorView.source)
+    fun initEditor(image: Bitmap) {
+        photoEditorView.source.setImageBitmap(image)
+        initActions()
+        initTextControls()
+        initColorPalette()
     }
 
     private fun initActions() {

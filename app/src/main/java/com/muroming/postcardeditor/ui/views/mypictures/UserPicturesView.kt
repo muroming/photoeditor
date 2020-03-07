@@ -1,6 +1,7 @@
 package com.muroming.postcardeditor.ui.views.mypictures
 
 import android.content.Context
+import android.net.Uri
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.RelativeLayout
@@ -16,8 +17,10 @@ class UserPicturesView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : RelativeLayout(context, attrs, defStyleAttr) {
 
+    var onUserPictureClicked: (Uri) -> Unit = {}
+
     private val userPicturesAdapter: UserPicturesAdapter by lazy {
-        UserPicturesAdapter(context, R.layout.item_user_medium_picture)
+        UserPicturesAdapter(context, R.layout.item_user_medium_picture, ::onPictureClicked)
     }
 
     init {
@@ -40,5 +43,9 @@ class UserPicturesView @JvmOverloads constructor(
     fun update(pictures: List<UserPicture>) {
         userPicturesAdapter.setItems(pictures)
         userPicturesAdapter.notifyDataSetChanged()
+    }
+
+    private fun onPictureClicked(uri: Uri) {
+        onUserPictureClicked(uri)
     }
 }

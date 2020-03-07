@@ -28,15 +28,9 @@ class PhotoEditorViewModel : ViewModel() {
         .map {
             UserPicture(it.toUri())
         }
-            .let(userPictures::setValue)
+        .let(userPictures::setValue)
 
     fun loadPresets(resources: Resources) {
-//        directory
-//            .listFiles()
-//            .filter { PRESET_REGEX.matches(it.name) }
-//            .map {
-//                UserPicture(it.toUri())
-//            }
         val resId = R.drawable.k
         List(USER_PICTURES_COUNT) {
             UserPicture(

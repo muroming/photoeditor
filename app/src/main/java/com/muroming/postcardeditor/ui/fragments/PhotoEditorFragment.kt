@@ -1,5 +1,6 @@
 package com.muroming.postcardeditor.ui.fragments
 
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
@@ -32,7 +33,7 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor), OnBackPressedLis
         viewModel.observeEditorState().observe(this, ::onEditorStateChanged)
 
         vPhotoEditor.fragmentManager = childFragmentManager
-
+        vUserPictures.onUserPictureClicked = ::onUserPictureClicked
     }
 
     private fun initPresetsRecycler() {
@@ -56,6 +57,11 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor), OnBackPressedLis
         viewModel.onPresetClicked()
     }
 
+    private fun onUserPictureClicked(uri: Uri) {
+        vPhotoEditor.initEditor(BitmapFactory.decodeFile(uri.path))
+        viewModel.onPresetClicked()
+    }
+
     private fun showEditor() {
         rvPresets.visibility = View.GONE
         mockIcons.visibility = View.INVISIBLE
@@ -65,6 +71,8 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor), OnBackPressedLis
 
     private fun showPresets() {
         vPhotoEditor.clearEditor()
+        viewModel.loadUserPictures(requireContext().filesDir)
+
         rvPresets.visibility = View.VISIBLE
         vPhotoEditor.visibility = View.GONE
         mockIcons.visibility = View.VISIBLE
