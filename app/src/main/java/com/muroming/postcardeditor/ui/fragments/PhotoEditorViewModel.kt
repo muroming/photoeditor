@@ -3,6 +3,7 @@ package com.muroming.postcardeditor.ui.fragments
 import android.content.ContentResolver
 import android.content.res.Resources
 import android.net.Uri
+import androidx.core.net.toUri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -21,24 +22,13 @@ class PhotoEditorViewModel : ViewModel() {
 
     fun getEditorState() = editorState.value
 
-    fun loadUserPictures(resources: Resources) {
-//        directory
-//            .listFiles()
-//            .filter { it.name.contains(".png") || it.name.contains(".jpg") }
-//            .map {
-//                UserPicture(it.toUri())
-//            }
-        val resId = R.drawable.kek
-
-        List(USER_PICTURES_COUNT) { UserPicture(
-            Uri.parse(
-            ContentResolver.SCHEME_ANDROID_RESOURCE + "://" +
-                    resources.getResourcePackageName(resId) + '/' +
-                    resources.getResourceTypeName(resId) + '/' +
-                    resources.getResourceEntryName(resId)
-        )) }
+    fun loadUserPictures(directory: File) = directory
+        .listFiles()
+        .filter { it.name.contains(".png") || it.name.contains(".jpg") }
+        .map {
+            UserPicture(it.toUri())
+        }
             .let(userPictures::setValue)
-    }
 
     fun loadPresets(resources: Resources) {
 //        directory
@@ -64,6 +54,7 @@ class PhotoEditorViewModel : ViewModel() {
     fun onPresetClicked() {
         editorState.value = EditorState.EDITING
     }
+
     fun onSavingComplete() {
         editorState.value = EditorState.PRESETS
     }

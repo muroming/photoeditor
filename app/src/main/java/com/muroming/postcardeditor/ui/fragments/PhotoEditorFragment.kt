@@ -24,7 +24,7 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor), OnBackPressedLis
         initPresetsRecycler()
         initListeners()
 
-        viewModel.loadUserPictures(resources)
+        viewModel.loadUserPictures(requireContext().filesDir)
         viewModel.observeUserPictures().observe(this, vUserPictures::update)
 
         viewModel.loadPresets(resources)
