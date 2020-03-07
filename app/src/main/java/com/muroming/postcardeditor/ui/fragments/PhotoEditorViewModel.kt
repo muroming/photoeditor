@@ -31,8 +31,9 @@ class PhotoEditorViewModel : ViewModel() {
         .let(userPictures::setValue)
 
     fun loadPresets(resources: Resources) {
-        val resId = R.drawable.k
         List(USER_PICTURES_COUNT) {
+            val resId = if (it % 2 == 0) R.drawable.k else R.drawable.kek
+
             UserPicture(
                 Uri.parse(
                     ContentResolver.SCHEME_ANDROID_RESOURCE + "://" +

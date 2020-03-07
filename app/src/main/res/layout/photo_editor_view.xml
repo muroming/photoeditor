@@ -92,6 +92,15 @@
         app:layout_constraintStart_toEndOf="@id/ivBoldText" />
 
     <ImageView
+        android:id="@+id/ivUnderlineText"
+        android:layout_width="@dimen/small_icon_size"
+        android:layout_height="@dimen/small_icon_size"
+        android:layout_margin="8dp"
+        android:background="@drawable/ic_underline_text"
+        app:layout_constraintBottom_toTopOf="@id/ivTextToLeft"
+        app:layout_constraintStart_toEndOf="@id/ivItalicText" />
+
+    <ImageView
         android:id="@+id/ivBrushSize"
         android:layout_width="@dimen/max_brush_size"
         android:layout_height="@dimen/max_brush_size"
@@ -121,7 +130,7 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:visibility="gone"
-        app:constraint_referenced_ids="etTextInput,vInputTextBackground,ivTextToLeft,ivTextToCenter,ivTextToRight,ivBoldText,ivItalicText,vTextSizeSlider" />
+        app:constraint_referenced_ids="etTextInput,vInputTextBackground,ivTextToLeft,ivTextToCenter,ivTextToRight,ivBoldText,ivItalicText,vTextSizeSlider,ivUnderlineText" />
 
     <SeekBar
         android:id="@+id/vBrushSlider"

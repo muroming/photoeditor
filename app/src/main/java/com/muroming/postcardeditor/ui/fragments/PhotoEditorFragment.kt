@@ -53,7 +53,7 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor), OnBackPressedLis
     }
 
     private fun onPresetClicked(uri: Uri) {
-        vPhotoEditor.initEditor(uri)
+        vPhotoEditor.initEditor(requireContext().contentResolver, uri)
         viewModel.onPresetClicked()
     }
 

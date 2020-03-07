@@ -1,11 +1,10 @@
 package com.muroming.postcardeditor.ui.views.editorview
 
+import android.content.ContentResolver
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.Color
-import android.graphics.PorterDuff
-import android.graphics.Typeface
+import android.graphics.*
 import android.net.Uri
+import android.provider.MediaStore
 import android.util.AttributeSet
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -20,7 +19,6 @@ import com.muroming.postcardeditor.utils.getFocusWithKeyboard
 import com.muroming.postcardeditor.utils.setSize
 import com.muroming.postcardeditor.utils.setVisibility
 import com.muroming.postcardeditor.utils.toSp
-import com.squareup.picasso.Picasso
 import dev.sasikanth.colorsheet.ColorSheet
 import ja.burhanrashid52.photoeditor.PhotoEditor
 import ja.burhanrashid52.photoeditor.TextStyleBuilder
@@ -43,6 +41,8 @@ class PhotoEditorView @JvmOverloads constructor(
 
     private var isTextBold = false
     private var isTextItalic = false
+    private var isTextUnderlined = false
+
     private val minTextSize = resources.getDimensionPixelSize(R.dimen.min_text_size)
     private val maxTextSize = resources.getDimensionPixelSize(R.dimen.max_text_size)
 
@@ -69,11 +69,9 @@ class PhotoEditorView @JvmOverloads constructor(
         initPhotoEditor()
     }
 
-    fun initEditor(uri: Uri) {
-        Picasso.get().load(uri).into(photoEditorView.source)
-        initActions()
-        initTextControls()
-        initColorPalette()
+    fun initEditor(contentResolver: ContentResolver, uri: Uri) {
+        val bitmap = MediaStore.Images.Media.getBitmap(contentResolver, uri)
+        initEditor(bitmap)
     }
 
     fun initEditor(image: Bitmap) {
@@ -124,8 +122,11 @@ class PhotoEditorView @JvmOverloads constructor(
         ivTextToLeft.setOnClickListener { etTextInput.gravity = Gravity.LEFT }
         ivTextToRight.setOnClickListener { etTextInput.gravity = Gravity.RIGHT }
         ivTextToCenter.setOnClickListener { etTextInput.gravity = Gravity.CENTER }
+
         ivBoldText.setOnClickListener { setInputTextBold() }
         ivItalicText.setOnClickListener { setInputTextItalic() }
+        ivUnderlineText.setOnClickListener { setInputTextUnderlined() }
+
         vInputTextBackground.setOnClickListener { hideTextInputAndInstantiateText() }
         vTextSizeSlider.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
@@ -194,11 +195,14 @@ class PhotoEditorView @JvmOverloads constructor(
 
         photoEditor.clearAllViews()
         photoEditor.setBrushDrawingMode(false)
+        photoEditorView.source.setImageBitmap(null)
+        cropper_view.release()
 
         isErasing = false
         isDrawing = false
         isTextBold = false
         isTextItalic = false
+        isTextUnderlined = false
     }
 
     fun saveImage(filepath: String, onSuccess: (Boolean) -> Unit) {
@@ -233,13 +237,13 @@ class PhotoEditorView @JvmOverloads constructor(
     }
 
     private fun onCropClicked(view: ImageView) {
-        TODO()
-//        val imageBitmap = photoEditorView.source.drawToBitmap()
-//        cropper_view.apply {
-//            setImageBitmap(imageBitmap)
-//            setVisibility(true)
-//        }
-//        photoEditorView.setVisibility(false)
+        photoEditor.saveAsBitmap(BitmapSaveListener({ imageBitmap ->
+            cropper_view.apply {
+                setImageBitmap(imageBitmap)
+                setVisibility(true)
+            }
+            photoEditorView.setVisibility(false)
+        }))
     }
 
     private fun onFrameClicked(view: ImageView) {}
@@ -289,6 +293,15 @@ class PhotoEditorView @JvmOverloads constructor(
     private fun setInputTextItalic() {
         isTextItalic = !isTextItalic
         etTextInput.setTypeface(null, getTextStyle())
+    }
+
+    private fun setInputTextUnderlined() {
+        isTextUnderlined = !isTextUnderlined
+        etTextInput.paintFlags = if (isTextUnderlined) {
+            etTextInput.paintFlags or Paint.UNDERLINE_TEXT_FLAG
+        } else {
+            etTextInput.paintFlags xor Paint.UNDERLINE_TEXT_FLAG
+        }
     }
 
     private fun getTextStyle(): Int = if (isTextBold) {
