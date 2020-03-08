@@ -10,10 +10,7 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.inputmethod.InputMethodManager
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.ImageView
-import android.widget.SeekBar
+import android.widget.*
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.FragmentManager
@@ -54,6 +51,8 @@ class PhotoEditorView @JvmOverloads constructor(
 
     private lateinit var colorPalette: IntArray
     private var selectedColor = -1
+
+    private var currentTypeface: Typeface? = null
 
     private val editorActions: Map<Int, (ImageView) -> Unit> = mapOf(
         R.drawable.ic_add_text to ::onAddTextClicked,
@@ -223,7 +222,8 @@ class PhotoEditorView @JvmOverloads constructor(
                 position: Int,
                 id: Long
             ) {
-                etTextInput.setTypeface(editorFonts[position].second, getTextStyle())
+                currentTypeface = editorFonts[position].second
+                updateTextTypeface()
             }
         }
     }
@@ -240,9 +240,7 @@ class PhotoEditorView @JvmOverloads constructor(
 
         isErasing = false
         isDrawing = false
-        isTextBold = false
-        isTextItalic = false
-        isTextUnderlined = false
+        setInputTextGroupVisibility(false)
     }
 
     fun saveImage(filepath: String, onSuccess: (Boolean) -> Unit) {
@@ -327,12 +325,16 @@ class PhotoEditorView @JvmOverloads constructor(
 
     private fun setInputTextBold() {
         isTextBold = !isTextBold
-        etTextInput.setTypeface(etTextInput.typeface, getTextStyle())
+        updateTextTypeface()
     }
 
     private fun setInputTextItalic() {
         isTextItalic = !isTextItalic
-        etTextInput.setTypeface(etTextInput.typeface, getTextStyle())
+        updateTextTypeface()
+    }
+
+    private fun updateTextTypeface() {
+        etTextInput.setTypeface(currentTypeface, getTextStyle())
     }
 
     private fun setInputTextUnderlined() {
@@ -352,18 +354,25 @@ class PhotoEditorView @JvmOverloads constructor(
 
     private fun setInputTextGroupVisibility(isVisible: Boolean) {
         textAddingGroup.setVisibility(isVisible)
-        etTextInput.apply {
-            setText("")
-            textSize = minTextSize.toFloat()
-            gravity = Gravity.LEFT
-            setTypeface(null, Typeface.NORMAL)
-        }
+        etTextInput.resetInputText()
+        vTypefacesSpinner.setSelection(0)
         if (isVisible) {
             etTextInput.getFocusWithKeyboard(inputMethodManager)
         } else {
             inputMethodManager.hideSoftInputFromWindow(windowToken, 0)
         }
         vBrushSlider.setVisibility(!isVisible && (isDrawing || isErasing))
+    }
+
+    private fun EditText.resetInputText() {
+        setText("")
+        textSize = minTextSize.toFloat()
+        gravity = Gravity.LEFT
+        currentTypeface = null
+        isTextBold = false
+        isTextItalic = false
+        isTextUnderlined = false
+        updateTextTypeface()
     }
 
     companion object {
