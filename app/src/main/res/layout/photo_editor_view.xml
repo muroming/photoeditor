@@ -39,12 +39,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@null"
+        android:fontFamily="@font/amaranth"
         android:minWidth="200dp"
         android:textSize="@dimen/min_text_size"
         app:layout_constraintBottom_toBottomOf="@id/vInputTextBackground"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/vInputTextBackground" />
+        app:layout_constraintTop_toTopOf="@id/vInputTextBackground"
+        tools:text="Demo text" />
 
     <ImageView
         android:id="@+id/ivTextToLeft"
@@ -116,21 +118,34 @@
     <SeekBar
         android:id="@+id/vTextSizeSlider"
         android:layout_width="0dp"
-        android:layout_height="@dimen/small_icon_size"
-        android:layout_margin="4dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="4dp"
         android:background="@color/dark_blue"
         android:progressTint="@color/white"
         android:thumbTint="@color/white"
         app:layout_constraintBottom_toBottomOf="@id/ivTextToRight"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/ivTextToRight" />
+        app:layout_constraintStart_toEndOf="@id/ivTextToRight"
+        app:layout_constraintTop_toTopOf="@id/ivTextToRight" />
+
+    <Spinner
+        android:id="@+id/vTypefacesSpinner"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="4dp"
+        app:layout_constraintBottom_toBottomOf="@id/ivUnderlineText"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/ivUnderlineText"
+        app:layout_constraintTop_toTopOf="@id/ivUnderlineText" />
 
     <androidx.constraintlayout.widget.Group
         android:id="@+id/textAddingGroup"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:visibility="gone"
-        app:constraint_referenced_ids="etTextInput,vInputTextBackground,ivTextToLeft,ivTextToCenter,ivTextToRight,ivBoldText,ivItalicText,vTextSizeSlider,ivUnderlineText" />
+        app:constraint_referenced_ids="etTextInput,vInputTextBackground,ivTextToLeft,ivTextToCenter,ivTextToRight,ivBoldText,ivItalicText,vTextSizeSlider,ivUnderlineText,vTypefacesSpinner" />
 
     <SeekBar
         android:id="@+id/vBrushSlider"

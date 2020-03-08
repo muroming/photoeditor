@@ -10,9 +10,12 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.ImageView
 import android.widget.SeekBar
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.FragmentManager
 import com.muroming.postcardeditor.R
 import com.muroming.postcardeditor.utils.getFocusWithKeyboard
@@ -63,6 +66,18 @@ class PhotoEditorView @JvmOverloads constructor(
         R.drawable.ic_crop to ::onCropClicked,
         R.drawable.ic_wand to ::onWandClicked
     )
+
+    private val editorFonts = mapOf(
+        "Default" to null,
+        "Amaranth" to R.font.amaranth,
+        "Elysium" to R.font.elysium,
+        "Honey Beeg" to R.font.honey_beeg,
+        "Meamury" to R.font.meamury,
+        "Reload" to R.font.reload,
+        "Zabava" to R.font.zabava
+    ).mapNotNull { (name, font) ->
+        name to font?.let { ResourcesCompat.getFont(context, font) }
+    }
 
     init {
         LayoutInflater.from(context).inflate(R.layout.photo_editor_view, this, true)
@@ -186,6 +201,31 @@ class PhotoEditorView @JvmOverloads constructor(
                     .start()
             }
         })
+        setupFontsAdapter()
+    }
+
+    private fun setupFontsAdapter() {
+        ArrayAdapter(
+            context,
+            android.R.layout.simple_spinner_dropdown_item,
+            editorFonts.map(Pair<String, Typeface?>::first)
+        ).apply {
+            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            vTypefacesSpinner.adapter = this
+        }
+
+        vTypefacesSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                etTextInput.setTypeface(editorFonts[position].second, getTextStyle())
+            }
+        }
     }
 
     fun clearEditor() {
@@ -287,12 +327,12 @@ class PhotoEditorView @JvmOverloads constructor(
 
     private fun setInputTextBold() {
         isTextBold = !isTextBold
-        etTextInput.setTypeface(null, getTextStyle())
+        etTextInput.setTypeface(etTextInput.typeface, getTextStyle())
     }
 
     private fun setInputTextItalic() {
         isTextItalic = !isTextItalic
-        etTextInput.setTypeface(null, getTextStyle())
+        etTextInput.setTypeface(etTextInput.typeface, getTextStyle())
     }
 
     private fun setInputTextUnderlined() {
