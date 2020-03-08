@@ -16,15 +16,41 @@
         android:id="@+id/cropper_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_marginBottom="4dp"
         android:background="#ff282828"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@id/photoEditorView"
+        app:layout_constraintBottom_toBottomOf="@id/glEditorActions"
         app:layout_constraintTop_toTopOf="parent"
         app:nocropper__grid_color="@color/colorAccent"
-        app:nocropper__grid_opacity="0.8"
-        app:nocropper__grid_thickness="0.8dp"
-        app:nocropper__padding_color="@android:color/transparent" />
+        app:nocropper__grid_opacity="1"
+        app:nocropper__grid_thickness="1dp"
+        app:nocropper__padding_color="@color/white" />
 
+    <ImageView
+        android:id="@+id/ivConfirmCrop"
+        android:layout_width="@dimen/big_icon_size"
+        android:layout_height="@dimen/big_icon_size"
+        android:layout_marginBottom="8dp"
+        android:src="@drawable/ic_confirm"
+        app:layout_constraintBottom_toBottomOf="@id/cropper_view"
+        app:layout_constraintEnd_toStartOf="@id/ivCancelCrop"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageView
+        android:id="@+id/ivCancelCrop"
+        android:layout_width="@dimen/big_icon_size"
+        android:layout_height="@dimen/big_icon_size"
+        android:layout_marginBottom="8dp"
+        android:src="@drawable/ic_cancel"
+        app:layout_constraintBottom_toBottomOf="@id/cropper_view"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/ivConfirmCrop" />
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/croppingControls"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        app:constraint_referenced_ids="ivConfirmCrop,ivCancelCrop" />
 
     <View
         android:id="@+id/vInputTextBackground"

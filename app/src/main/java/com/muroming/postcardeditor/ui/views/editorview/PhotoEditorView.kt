@@ -92,6 +92,7 @@ class PhotoEditorView @JvmOverloads constructor(
         photoEditorView.source.setImageBitmap(image)
         initActions()
         initTextControls()
+        initCropControls()
         initColorPalette()
     }
 
@@ -156,6 +157,11 @@ class PhotoEditorView @JvmOverloads constructor(
         })
     }
 
+    private fun initCropControls() {
+        ivCancelCrop.setOnClickListener { hideCroppingView() }
+        ivConfirmCrop.setOnClickListener { applyCropping() }
+    }
+
     private fun initColorPalette() {
         colorPalette = resources.getIntArray(R.array.paletteColors)
         selectedColor = colorPalette.first()
@@ -171,6 +177,7 @@ class PhotoEditorView @JvmOverloads constructor(
         photoEditor.brushColor = Color.parseColor("#ff0000")
         photoEditor.setBrushDrawingMode(false)
 
+        cropper_view.initWithFitToCenter(true)
         vBrushSlider.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 seekBar?.takeIf { fromUser }?.let {
@@ -275,13 +282,7 @@ class PhotoEditorView @JvmOverloads constructor(
     }
 
     private fun onCropClicked(view: ImageView) {
-        photoEditor.saveAsBitmap(BitmapSaveListener({ imageBitmap ->
-            cropper_view.apply {
-                setImageBitmap(imageBitmap)
-                setVisibility(true)
-            }
-            photoEditorView.setVisibility(false)
-        }))
+        showCroppingView()
     }
 
     private fun onFrameClicked(view: ImageView) {}
@@ -307,6 +308,36 @@ class PhotoEditorView @JvmOverloads constructor(
         } else {
             photoEditor.setBrushDrawingMode(false)
         }
+    }
+
+    private fun showCroppingView() {
+        photoEditor.saveAsBitmap(BitmapSaveListener({ imageBitmap ->
+            cropper_view.apply {
+                setImageBitmap(imageBitmap)
+                setVisibility(true)
+            }
+            croppingControls.setVisibility(true)
+            setInputTextGroupVisibility(false)
+            vBrushSlider.setVisibility(false)
+            photoEditorView.setVisibility(false)
+        }))
+    }
+
+    private fun hideCroppingView() {
+        cropper_view.apply {
+            setVisibility(false)
+            release()
+        }
+        croppingControls.setVisibility(false)
+        vBrushSlider.setVisibility(isDrawing || isErasing)
+        photoEditorView.setVisibility(true)
+    }
+
+    private fun applyCropping() {
+        cropper_view.getCroppedBitmapAsync(CropCallback {
+            it?.let(::initEditor)
+            hideCroppingView()
+        })
     }
 
     private fun hideTextInputAndInstantiateText() {
