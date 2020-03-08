@@ -2,7 +2,10 @@ package com.muroming.postcardeditor.ui.views.editorview
 
 import android.content.ContentResolver
 import android.content.Context
-import android.graphics.*
+import android.graphics.Bitmap
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.Typeface
 import android.net.Uri
 import android.provider.MediaStore
 import android.util.AttributeSet
@@ -88,7 +91,7 @@ class PhotoEditorView @JvmOverloads constructor(
         initEditor(bitmap)
     }
 
-    fun initEditor(image: Bitmap) {
+    private fun initEditor(image: Bitmap) {
         photoEditorView.source.setImageBitmap(image)
         initActions()
         initTextControls()
@@ -269,6 +272,7 @@ class PhotoEditorView @JvmOverloads constructor(
         ) { newColor ->
             selectedColor = newColor
             photoEditor.brushColor = selectedColor
+            etTextInput.setTextColor(selectedColor)
             photoEditor.setBrushDrawingMode(isDrawing)
         }.show(fragmentManager)
     }
@@ -293,7 +297,6 @@ class PhotoEditorView @JvmOverloads constructor(
         isDrawing = !isDrawing
         isErasing = false
 
-        view.setColorFilter(if (isDrawing) SELECTED_ACTION_TINT else 0, PorterDuff.Mode.MULTIPLY)
         vBrushSlider.setVisibility(isDrawing)
         photoEditor.setBrushDrawingMode(isDrawing)
     }
@@ -348,6 +351,7 @@ class PhotoEditorView @JvmOverloads constructor(
                 withGravity(gravity)
                 withTextSize(etTextInput.textSize.toSp())
                 withTextFont(etTextInput.typeface)
+                withTextColor(etTextInput.currentTextColor)
             }
             photoEditor.addText(text, textStyle)
         }

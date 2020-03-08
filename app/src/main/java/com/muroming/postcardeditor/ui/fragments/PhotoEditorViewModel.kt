@@ -54,8 +54,8 @@ class PhotoEditorViewModel : ViewModel() {
         editorState.value = EditorState.PRESETS
     }
 
-    fun onSavingDialogDismissed(shouldCloseEditor: Boolean) {
-        editorState.value = if (shouldCloseEditor) EditorState.PRESETS else EditorState.EDITING
+    fun onFinishedEdeting() {
+        editorState.value = EditorState.PRESETS
     }
 
     fun generateFilePath(directory: File): String {

@@ -1,6 +1,5 @@
 package com.muroming.postcardeditor.ui.fragments
 
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
@@ -58,8 +57,22 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor), OnBackPressedLis
     }
 
     private fun onUserPictureClicked(uri: Uri) {
-        vPhotoEditor.initEditor(BitmapFactory.decodeFile(uri.path))
-        viewModel.onPresetClicked()
+        if (viewModel.getEditorState() == EditorState.EDITING) {
+            SavePictureDialog(
+                onSavePicture = {
+                    vPhotoEditor.saveImage(
+                        viewModel.generateFilePath(requireContext().filesDir)
+                    ) { isSuccessful ->
+                        if (isSuccessful) {
+                            onPresetClicked(uri)
+                        }
+                    }
+                },
+                onNotSavingPicture = { onPresetClicked(uri) }
+            ).show(childFragmentManager, SavePictureDialog.DIALOG_TAG)
+        } else {
+            onPresetClicked(uri)
+        }
     }
 
     private fun showEditor() {
@@ -81,7 +94,7 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor), OnBackPressedLis
 
     private fun showSavingDialog() {
         SavePictureDialog(
-            {
+            onSavePicture = {
                 vPhotoEditor.saveImage(
                     viewModel.generateFilePath(requireContext().filesDir)
                 ) { isSuccessful ->
@@ -90,7 +103,7 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor), OnBackPressedLis
                     }
                 }
             },
-            { shouldCloseEditor -> viewModel.onSavingDialogDismissed(shouldCloseEditor) }
+            onNotSavingPicture = { viewModel.onFinishedEdeting() }
         ).show(childFragmentManager, SavePictureDialog.DIALOG_TAG)
     }
 
