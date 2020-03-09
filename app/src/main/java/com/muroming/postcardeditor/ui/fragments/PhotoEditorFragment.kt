@@ -2,7 +2,9 @@ package com.muroming.postcardeditor.ui.fragments
 
 import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
 import android.view.View
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.observe
@@ -10,9 +12,13 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.muroming.postcardeditor.R
 import com.muroming.postcardeditor.data.UserPicture
 import com.muroming.postcardeditor.ui.views.UserPicturesAdapter
+import com.muroming.postcardeditor.ui.views.editorview.CropStarter
+import com.yalantis.ucrop.UCrop
 import kotlinx.android.synthetic.main.fragment_editor.*
+import java.io.File
 
-class PhotoEditorFragment : Fragment(R.layout.fragment_editor), OnBackPressedListener {
+class PhotoEditorFragment : Fragment(R.layout.fragment_editor), OnBackPressedListener,
+    OnCropFinishedListener, CropStarter {
     private val viewModel: PhotoEditorViewModel by viewModels()
 
     private val presetsAdapter: UserPicturesAdapter by lazy {
@@ -31,7 +37,10 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor), OnBackPressedLis
         viewModel.observePresets().observe(this, ::updatePresets)
         viewModel.observeEditorState().observe(this, ::onEditorStateChanged)
 
-        vPhotoEditor.fragmentManager = childFragmentManager
+        vPhotoEditor.apply {
+            fragmentManager = childFragmentManager
+            cropStarter = this@PhotoEditorFragment
+        }
         vUserPictures.onUserPictureClicked = ::onUserPictureClicked
     }
 
@@ -52,7 +61,8 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor), OnBackPressedLis
     }
 
     private fun onPresetClicked(uri: Uri) {
-        vPhotoEditor.initEditor(requireContext().contentResolver, uri)
+        val bitmap = MediaStore.Images.Media.getBitmap(requireContext().contentResolver, uri)
+        vPhotoEditor.initEditor(bitmap)
         viewModel.onPresetClicked()
     }
 
@@ -114,11 +124,35 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor), OnBackPressedLis
         }
     }
 
+    override fun startCrop() {
+        (activity as? AppCompatActivity)?.let {
+            UCrop.of(
+                Uri.fromFile(getTempSrc()),
+                Uri.fromFile(getTempDest())
+            ).start(it)
+        }
+    }
+
+    override fun onImageCropped(uri: Uri) {
+        val bitmap = MediaStore.Images.Media.getBitmap(requireContext().contentResolver, uri)
+        vPhotoEditor.setCroppedImage(bitmap)
+        getTempDest().takeIf(File::exists)?.delete()
+        getTempSrc().takeIf(File::exists)?.delete()
+    }
+
+    private fun getTempSrc() = File(requireContext().filesDir, tempCropSrcFilename)
+    private fun getTempDest() = File(requireContext().filesDir, tempCropDestFilename)
+
     override fun onBackPressed(): Boolean = when (viewModel.getEditorState()) {
         EditorState.EDITING -> {
             showSavingDialog()
             true
         }
         else -> false
+    }
+
+    companion object {
+        const val tempCropSrcFilename = "tempcrop.png"
+        private const val tempCropDestFilename = "destcrop.png"
     }
 }

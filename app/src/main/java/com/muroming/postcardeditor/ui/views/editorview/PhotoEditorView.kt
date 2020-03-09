@@ -1,13 +1,10 @@
 package com.muroming.postcardeditor.ui.views.editorview
 
-import android.content.ContentResolver
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Typeface
-import android.net.Uri
-import android.provider.MediaStore
 import android.util.AttributeSet
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -18,6 +15,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.FragmentManager
 import com.muroming.postcardeditor.R
+import com.muroming.postcardeditor.ui.fragments.PhotoEditorFragment
 import com.muroming.postcardeditor.utils.setSize
 import com.muroming.postcardeditor.utils.setVisibility
 import com.muroming.postcardeditor.utils.toSp
@@ -25,6 +23,7 @@ import dev.sasikanth.colorsheet.ColorSheet
 import ja.burhanrashid52.photoeditor.PhotoEditor
 import ja.burhanrashid52.photoeditor.TextStyleBuilder
 import kotlinx.android.synthetic.main.photo_editor_view.view.*
+import java.io.File
 
 class PhotoEditorView @JvmOverloads constructor(
     context: Context,
@@ -33,6 +32,7 @@ class PhotoEditorView @JvmOverloads constructor(
 ) : ConstraintLayout(context, attrs, defStyleAttr) {
 
     lateinit var fragmentManager: FragmentManager
+    lateinit var cropStarter: CropStarter
 
     private lateinit var photoEditor: PhotoEditor
     private val minBrushSize = resources.getDimensionPixelSize(R.dimen.min_brush_size)
@@ -85,17 +85,15 @@ class PhotoEditorView @JvmOverloads constructor(
         initPhotoEditor()
     }
 
-    fun initEditor(contentResolver: ContentResolver, uri: Uri) {
-        val bitmap = MediaStore.Images.Media.getBitmap(contentResolver, uri)
-        initEditor(bitmap)
-    }
-
-    private fun initEditor(image: Bitmap) {
+    fun initEditor(image: Bitmap) {
         photoEditorView.source.setImageBitmap(image)
         initActions()
         initTextControls()
-        initCropControls()
         initColorPalette()
+    }
+
+    fun setCroppedImage(bitmap: Bitmap) {
+        photoEditorView.source.setImageBitmap(bitmap)
     }
 
     private fun initActions() {
@@ -159,11 +157,6 @@ class PhotoEditorView @JvmOverloads constructor(
         })
     }
 
-    private fun initCropControls() {
-        ivCancelCrop.setOnClickListener { hideCroppingView() }
-        ivConfirmCrop.setOnClickListener { applyCropping() }
-    }
-
     private fun initColorPalette() {
         colorPalette = resources.getIntArray(R.array.paletteColors)
         selectedColor = colorPalette.first()
@@ -179,7 +172,6 @@ class PhotoEditorView @JvmOverloads constructor(
         photoEditor.brushColor = Color.parseColor("#ff0000")
         photoEditor.setBrushDrawingMode(false)
 
-        cropper_view.initWithFitToCenter(true)
         vBrushSlider.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 seekBar?.takeIf { fromUser }?.let {
@@ -238,14 +230,12 @@ class PhotoEditorView @JvmOverloads constructor(
     }
 
     fun clearEditor() {
-        cropper_view.setVisibility(false)
         photoEditorView.setVisibility(true)
         vBrushSlider.setVisibility(false)
 
         photoEditor.clearAllViews()
         photoEditor.setBrushDrawingMode(false)
         photoEditorView.source.setImageBitmap(null)
-        cropper_view.release()
 
         isErasing = false
         isDrawing = false
@@ -285,8 +275,22 @@ class PhotoEditorView @JvmOverloads constructor(
     }
 
     private fun onCropClicked(view: ImageView) {
-        showCroppingView()
+        pbCropLoading.setVisibility(true)
+        photoEditor.saveAsFile(getTempSrcPath(), PhotoSaveListener(
+            onSaved = {
+                pbCropLoading.setVisibility(false)
+                cropStarter.startCrop()
+            },
+            onFailure = {
+                pbCropLoading.setVisibility(false)
+            }
+        ))
     }
+
+    private fun getTempSrcPath() = File(
+        context.filesDir,
+        PhotoEditorFragment.tempCropSrcFilename
+    ).absolutePath
 
     private fun onFrameClicked(view: ImageView) {}
 
@@ -310,36 +314,6 @@ class PhotoEditorView @JvmOverloads constructor(
         } else {
             photoEditor.setBrushDrawingMode(false)
         }
-    }
-
-    private fun showCroppingView() {
-        photoEditor.saveAsBitmap(BitmapSaveListener({ imageBitmap ->
-            cropper_view.apply {
-                setImageBitmap(imageBitmap)
-                setVisibility(true)
-            }
-            croppingControls.setVisibility(true)
-            setInputTextGroupVisibility(false)
-            vBrushSlider.setVisibility(false)
-            photoEditorView.setVisibility(false)
-        }))
-    }
-
-    private fun hideCroppingView() {
-        cropper_view.apply {
-            setVisibility(false)
-            release()
-        }
-        croppingControls.setVisibility(false)
-        vBrushSlider.setVisibility(isDrawing || isErasing)
-        photoEditorView.setVisibility(true)
-    }
-
-    private fun applyCropping() {
-        cropper_view.getCroppedBitmapAsync(CropCallback {
-            it?.let(::initEditor)
-            hideCroppingView()
-        })
     }
 
     private fun hideTextInputAndInstantiateText() {
