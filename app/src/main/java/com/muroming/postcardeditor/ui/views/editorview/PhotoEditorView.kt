@@ -18,7 +18,6 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.FragmentManager
 import com.muroming.postcardeditor.R
-import com.muroming.postcardeditor.utils.getFocusWithKeyboard
 import com.muroming.postcardeditor.utils.setSize
 import com.muroming.postcardeditor.utils.setVisibility
 import com.muroming.postcardeditor.utils.toSp
@@ -389,14 +388,25 @@ class PhotoEditorView @JvmOverloads constructor(
 
     private fun setInputTextGroupVisibility(isVisible: Boolean) {
         textAddingGroup.setVisibility(isVisible)
-        etTextInput.resetInputText()
-        vTypefacesSpinner.setSelection(0)
-        if (isVisible) {
-            etTextInput.getFocusWithKeyboard(inputMethodManager)
-        } else {
-            inputMethodManager.hideSoftInputFromWindow(windowToken, 0)
+        etTextInput.apply {
+            resetInputText()
+            manageFocusWithKeyboard(isVisible)
         }
+        vTypefacesSpinner.setSelection(0)
         vBrushSlider.setVisibility(!isVisible && (isDrawing || isErasing))
+    }
+
+    private fun EditText.manageFocusWithKeyboard(shouldRequestFocus: Boolean) {
+        handler?.postDelayed({
+            if (shouldRequestFocus) {
+                if (requestFocus()) {
+                    inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0)
+                }
+            } else {
+                clearFocus()
+                inputMethodManager.hideSoftInputFromWindow(windowToken, 0)
+            }
+        }, EDITTEXT_FOCUS_REQUEST_DELAY)
     }
 
     private fun EditText.resetInputText() {
@@ -412,6 +422,7 @@ class PhotoEditorView @JvmOverloads constructor(
 
     companion object {
         private const val BRUSH_SIZE_ANIMATION_DURATION = 150L
+        private const val EDITTEXT_FOCUS_REQUEST_DELAY = 30L
         private val SELECTED_ACTION_TINT = Color.parseColor("#FFD32F2F")
     }
 }
