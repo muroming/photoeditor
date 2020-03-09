@@ -1,5 +1,6 @@
 package com.muroming.postcardeditor.ui
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
@@ -32,6 +33,9 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == RESULT_OK && requestCode == UCrop.REQUEST_CROP && data != null) {
             UCrop.getOutput(data)?.let(editorFragment::onImageCropped)
+        }
+        if (resultCode == Activity.RESULT_CANCELED && requestCode == UCrop.REQUEST_CROP) {
+            editorFragment.onCropCanceled()
         }
     }
 }

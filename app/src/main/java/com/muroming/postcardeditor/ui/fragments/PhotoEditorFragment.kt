@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.observe
@@ -138,6 +139,10 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor), OnBackPressedLis
         vPhotoEditor.setCroppedImage(bitmap)
         getTempDest().takeIf(File::exists)?.delete()
         getTempSrc().takeIf(File::exists)?.delete()
+    }
+
+    override fun onCropCanceled() {
+        onImageCropped(getTempSrc().toUri())
     }
 
     private fun getTempSrc() = File(requireContext().filesDir, tempCropSrcFilename)
