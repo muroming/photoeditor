@@ -22,82 +22,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <View
-        android:id="@+id/vInputTextBackground"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:background="#77000000"
-        app:layout_constraintBottom_toBottomOf="@id/photoEditorView"
-        app:layout_constraintTop_toTopOf="@id/photoEditorView" />
-
-    <EditText
-        android:id="@+id/etTextInput"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@null"
-        android:fontFamily="@font/amaranth"
-        android:minWidth="200dp"
-        android:textSize="@dimen/min_text_size"
-        app:layout_constraintBottom_toBottomOf="@id/vInputTextBackground"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/vInputTextBackground"
-        tools:text="Demo text" />
-
-    <ImageView
-        android:id="@+id/ivTextToLeft"
-        android:layout_width="@dimen/small_icon_size"
-        android:layout_height="@dimen/small_icon_size"
-        android:layout_margin="8dp"
-        android:background="@drawable/ic_text_to_left"
-        app:layout_constraintBottom_toBottomOf="@id/vInputTextBackground"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <ImageView
-        android:id="@+id/ivTextToCenter"
-        android:layout_width="@dimen/small_icon_size"
-        android:layout_height="@dimen/small_icon_size"
-        android:layout_margin="8dp"
-        android:background="@drawable/ic_text_to_center"
-        app:layout_constraintBottom_toBottomOf="@id/vInputTextBackground"
-        app:layout_constraintStart_toEndOf="@id/ivTextToLeft" />
-
-    <ImageView
-        android:id="@+id/ivTextToRight"
-        android:layout_width="@dimen/small_icon_size"
-        android:layout_height="@dimen/small_icon_size"
-        android:layout_margin="8dp"
-        android:background="@drawable/ic_text_to_right"
-        app:layout_constraintBottom_toBottomOf="@id/vInputTextBackground"
-        app:layout_constraintStart_toEndOf="@id/ivTextToCenter" />
-
-    <ImageView
-        android:id="@+id/ivBoldText"
-        android:layout_width="@dimen/small_icon_size"
-        android:layout_height="@dimen/small_icon_size"
-        android:layout_margin="8dp"
-        android:background="@drawable/ic_bold_text"
-        app:layout_constraintBottom_toTopOf="@id/ivTextToLeft"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <ImageView
-        android:id="@+id/ivItalicText"
-        android:layout_width="@dimen/small_icon_size"
-        android:layout_height="@dimen/small_icon_size"
-        android:layout_margin="8dp"
-        android:background="@drawable/ic_italic_text"
-        app:layout_constraintBottom_toTopOf="@id/ivTextToLeft"
-        app:layout_constraintStart_toEndOf="@id/ivBoldText" />
-
-    <ImageView
-        android:id="@+id/ivUnderlineText"
-        android:layout_width="@dimen/small_icon_size"
-        android:layout_height="@dimen/small_icon_size"
-        android:layout_margin="8dp"
-        android:background="@drawable/ic_underline_text"
-        app:layout_constraintBottom_toTopOf="@id/ivTextToLeft"
-        app:layout_constraintStart_toEndOf="@id/ivItalicText" />
-
     <ImageView
         android:id="@+id/ivBrushSize"
         android:layout_width="@dimen/max_brush_size"
@@ -111,38 +35,14 @@
         app:layout_constraintTop_toTopOf="@id/photoEditorView"
         app:layout_goneMarginBottom="48dp" />
 
-    <SeekBar
-        android:id="@+id/vTextSizeSlider"
+    <com.muroming.postcardeditor.ui.views.textaddingview.TextAddingView
+        android:id="@+id/vTextAddingView"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginStart="4dp"
-        android:layout_marginEnd="4dp"
-        android:background="@color/dark_blue"
-        android:progressTint="@color/white"
-        android:thumbTint="@color/white"
-        app:layout_constraintBottom_toBottomOf="@id/ivTextToRight"
+        app:layout_constraintBottom_toBottomOf="@id/glEditorActions"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/ivTextToRight"
-        app:layout_constraintTop_toTopOf="@id/ivTextToRight" />
-
-    <Spinner
-        android:id="@+id/vTypefacesSpinner"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginStart="4dp"
-        android:layout_marginEnd="4dp"
-        android:background="@color/dark_blue"
-        app:layout_constraintBottom_toBottomOf="@id/ivUnderlineText"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/ivUnderlineText"
-        app:layout_constraintTop_toTopOf="@id/ivUnderlineText" />
-
-    <androidx.constraintlayout.widget.Group
-        android:id="@+id/textAddingGroup"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:visibility="gone"
-        app:constraint_referenced_ids="etTextInput,vInputTextBackground,ivTextToLeft,ivTextToCenter,ivTextToRight,ivBoldText,ivItalicText,vTextSizeSlider,ivUnderlineText,vTypefacesSpinner" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <SeekBar
         android:id="@+id/vBrushSlider"

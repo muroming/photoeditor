@@ -2,7 +2,6 @@ package com.muroming.postcardeditor.ui.fragments
 
 import android.net.Uri
 import android.os.Bundle
-import android.provider.MediaStore
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
@@ -14,6 +13,8 @@ import com.muroming.postcardeditor.R
 import com.muroming.postcardeditor.data.UserPicture
 import com.muroming.postcardeditor.ui.views.UserPicturesAdapter
 import com.muroming.postcardeditor.ui.views.editorview.CropStarter
+import com.muroming.postcardeditor.utils.setVisibility
+import com.muroming.postcardeditor.utils.toBitmap
 import com.yalantis.ucrop.UCrop
 import kotlinx.android.synthetic.main.fragment_editor.*
 import java.io.File
@@ -62,7 +63,7 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor), OnBackPressedLis
     }
 
     private fun onPresetClicked(uri: Uri) {
-        val bitmap = MediaStore.Images.Media.getBitmap(requireContext().contentResolver, uri)
+        val bitmap = uri.toBitmap(requireContext().contentResolver)
         vPhotoEditor.initEditor(bitmap)
         viewModel.onPresetClicked()
     }
@@ -70,15 +71,7 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor), OnBackPressedLis
     private fun onUserPictureClicked(uri: Uri) {
         if (viewModel.getEditorState() == EditorState.EDITING) {
             SavePictureDialog(
-                onSavePicture = {
-                    vPhotoEditor.saveImage(
-                        viewModel.generateFilePath(requireContext().filesDir)
-                    ) { isSuccessful ->
-                        if (isSuccessful) {
-                            onPresetClicked(uri)
-                        }
-                    }
-                },
+                onSavePicture = { saveEditedPicture { onPresetClicked(uri) } },
                 onNotSavingPicture = { onPresetClicked(uri) }
             ).show(childFragmentManager, SavePictureDialog.DIALOG_TAG)
         } else {
@@ -87,35 +80,37 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor), OnBackPressedLis
     }
 
     private fun showEditor() {
-        rvPresets.visibility = View.GONE
+        rvPresets.setVisibility(false)
         mockIcons.visibility = View.INVISIBLE
-        editorMockIcons.visibility = View.VISIBLE
-        vPhotoEditor.visibility = View.VISIBLE
+        editorMockIcons.setVisibility(true)
+        vPhotoEditor.setVisibility(true)
     }
 
     private fun showPresets() {
         vPhotoEditor.clearEditor()
         viewModel.loadUserPictures(requireContext().filesDir)
 
-        rvPresets.visibility = View.VISIBLE
-        vPhotoEditor.visibility = View.GONE
-        mockIcons.visibility = View.VISIBLE
-        editorMockIcons.visibility = View.INVISIBLE
+        rvPresets.setVisibility(true)
+        mockIcons.setVisibility(true)
+        editorMockIcons.setVisibility(false)
+        vPhotoEditor.setVisibility(false)
     }
 
     private fun showSavingDialog() {
         SavePictureDialog(
-            onSavePicture = {
-                vPhotoEditor.saveImage(
-                    viewModel.generateFilePath(requireContext().filesDir)
-                ) { isSuccessful ->
-                    if (isSuccessful) {
-                        viewModel.onSavingComplete()
-                    }
-                }
-            },
+            onSavePicture = { saveEditedPicture { viewModel.onSavingComplete() } },
             onNotSavingPicture = { viewModel.onFinishedEdeting() }
         ).show(childFragmentManager, SavePictureDialog.DIALOG_TAG)
+    }
+
+    private fun saveEditedPicture(onSaved: () -> Unit) {
+        vPhotoEditor.saveImage(
+            viewModel.generateFilePath(requireContext().filesDir)
+        ) { isSuccessful ->
+            if (isSuccessful) {
+                onSaved()
+            }
+        }
     }
 
     private fun onEditorStateChanged(editorState: EditorState) {
@@ -135,7 +130,7 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor), OnBackPressedLis
     }
 
     override fun onImageCropped(uri: Uri) {
-        val bitmap = MediaStore.Images.Media.getBitmap(requireContext().contentResolver, uri)
+        val bitmap = uri.toBitmap(requireContext().contentResolver)
         vPhotoEditor.setCroppedImage(bitmap)
         getTempDest().takeIf(File::exists)?.delete()
         getTempSrc().takeIf(File::exists)?.delete()

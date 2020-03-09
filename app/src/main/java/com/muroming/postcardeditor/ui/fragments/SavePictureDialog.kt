@@ -8,7 +8,6 @@ import com.muroming.postcardeditor.R
 
 class SavePictureDialog(
     private val onSavePicture: () -> Unit,
-    private val onDismissDialog: () -> Unit = {},
     private val onNotSavingPicture: () -> Unit = {}
 ) : DialogFragment() {
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -22,7 +21,6 @@ class SavePictureDialog(
                 dismiss()
             }
             .setNeutralButton(R.string.dismiss_dialog) { _, _ ->
-                onDismissDialog()
                 dismiss()
             }
             .setMessage(R.string.editor_closing_warning)
