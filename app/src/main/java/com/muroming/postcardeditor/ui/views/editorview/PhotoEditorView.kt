@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.graphics.Typeface
 import android.util.AttributeSet
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.widget.ImageView
 import android.widget.SeekBar
@@ -64,6 +65,17 @@ class PhotoEditorView @JvmOverloads constructor(
         photoEditorView.source.setImageBitmap(image)
         initActions()
         initColorPalette()
+        photoEditorView.setOnTouchListener { _, event ->
+            val applyDrawing = event.action == MotionEvent.ACTION_UP
+            if (applyDrawing) {
+                photoEditor.setBrushDrawingMode(false)
+                photoEditor.setBrushDrawingMode(isDrawing)
+                if (isErasing) {
+                    photoEditor.brushEraser()
+                }
+            }
+            applyDrawing
+        }
     }
 
     fun setCroppedImage(bitmap: Bitmap) {
