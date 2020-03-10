@@ -11,8 +11,10 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.SeekBar
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.isVisible
 import androidx.fragment.app.FragmentManager
 import com.muroming.postcardeditor.R
+import com.muroming.postcardeditor.listeners.OnBackPressedListener
 import com.muroming.postcardeditor.ui.fragments.PhotoEditorFragment
 import com.muroming.postcardeditor.ui.views.textaddingview.TextAddingViewListener
 import com.muroming.postcardeditor.utils.setSize
@@ -28,7 +30,7 @@ class PhotoEditorView @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : ConstraintLayout(context, attrs, defStyleAttr),
-    TextAddingViewListener {
+    TextAddingViewListener, OnBackPressedListener {
 
     lateinit var fragmentManager: FragmentManager
     lateinit var cropStarter: CropStarter
@@ -233,7 +235,7 @@ class PhotoEditorView @JvmOverloads constructor(
 
     private fun onWandClicked(view: ImageView) {}
 
-    private fun onBrushClicked(view: ImageView) {
+    private fun onBrushClicked(view: ImageView?) {
         isDrawing = !isDrawing
         isErasing = false
 
@@ -241,7 +243,7 @@ class PhotoEditorView @JvmOverloads constructor(
         photoEditor.setBrushDrawingMode(isDrawing)
     }
 
-    private fun onEraserClicked(view: ImageView) {
+    private fun onEraserClicked(view: ImageView?) {
         isErasing = !isErasing
         isDrawing = false
 
@@ -273,8 +275,18 @@ class PhotoEditorView @JvmOverloads constructor(
         vBrushSlider.setVisibility(isDrawing || isErasing)
     }
 
+    override fun onBackPressed(): Boolean {
+        val intercepting = isDrawing || isErasing || vTextAddingView.isVisible
+        when {
+            isDrawing -> onBrushClicked(null)
+            isErasing -> onEraserClicked(null)
+            vTextAddingView.isVisible -> vTextAddingView.setInputTextGroupVisibility(false)
+        }
+
+        return intercepting
+    }
+
     companion object {
         private const val BRUSH_SIZE_ANIMATION_DURATION = 150L
-        private val SELECTED_ACTION_TINT = Color.parseColor("#FFD32F2F")
     }
 }

@@ -198,7 +198,9 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor),
 
     override fun onBackPressed(): Boolean = when (viewModel.getEditorState()) {
         EditorState.EDITING -> {
-            showSavingDialog()
+            if (vPhotoEditor.onBackPressed().not()) {
+                showSavingDialog()
+            }
             true
         }
         else -> false
