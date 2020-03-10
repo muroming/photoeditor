@@ -1,4 +1,4 @@
-package com.muroming.postcardeditor.ui.fragments
+package com.muroming.postcardeditor.listeners
 
 interface OnBackPressedListener {
     fun onBackPressed(): Boolean

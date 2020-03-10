@@ -31,11 +31,23 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+
+        handleCropResult(requestCode, resultCode, data)
+        handleImagePickResult(requestCode, resultCode, data)
+    }
+
+    private fun handleCropResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (resultCode == RESULT_OK && requestCode == UCrop.REQUEST_CROP && data != null) {
             UCrop.getOutput(data)?.let(editorFragment::onImageCropped)
         }
         if (resultCode == Activity.RESULT_CANCELED && requestCode == UCrop.REQUEST_CROP) {
             editorFragment.onCropCanceled()
+        }
+    }
+
+    private fun handleImagePickResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == PhotoEditorFragment.RESULT_PICK_IMAGE && resultCode == RESULT_OK) {
+            data?.data?.let(editorFragment::onImagePicked)
         }
     }
 }

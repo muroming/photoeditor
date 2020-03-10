@@ -2,6 +2,7 @@ package com.muroming.postcardeditor.utils
 
 import android.content.ContentResolver
 import android.content.res.Resources
+import android.graphics.Bitmap
 import android.net.Uri
 import android.provider.MediaStore
 import android.view.View
@@ -19,4 +20,4 @@ fun View.setVisibility(isVisible: Boolean) {
     visibility = if (!isVisible) View.GONE else View.VISIBLE
 }
 
-fun Uri.toBitmap(resolver: ContentResolver) = MediaStore.Images.Media.getBitmap(resolver, this)
+fun Uri.toBitmap(resolver: ContentResolver): Bitmap = MediaStore.Images.Media.getBitmap(resolver, this)

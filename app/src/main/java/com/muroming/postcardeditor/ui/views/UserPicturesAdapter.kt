@@ -7,7 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.LayoutRes
 import androidx.recyclerview.widget.RecyclerView
-import com.muroming.postcardeditor.data.UserPicture
+import com.muroming.postcardeditor.data.dto.UserPicture
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.item_user_medium_picture.view.*
 

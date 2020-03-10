@@ -166,9 +166,66 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="6dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/btnPickImageFromGallery"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/ivPresets" />
+
+    <ProgressBar
+        android:id="@+id/pbLoadingPresets"
+        android:layout_width="@dimen/big_icon_size"
+        android:layout_height="@dimen/big_icon_size"
+        app:layout_constraintBottom_toTopOf="@id/btnPickImageFromGallery"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/ivPresets" />
+
+    <TextView
+        android:id="@+id/tvLoadingError"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="@string/error_loading_presets"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toTopOf="@id/btnReloadPresets"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/ivPresets"
+        app:layout_constraintVertical_chainStyle="packed" />
+
+    <Button
+        android:id="@+id/btnReloadPresets"
+        android:layout_width="150dp"
+        android:layout_height="@dimen/medium_icon_size"
+        android:layout_marginTop="8dp"
+        android:backgroundTint="@color/dark_blue"
+        android:text="@string/reload"
+        android:textAllCaps="false"
+        android:textColor="@color/white"
+        app:layout_constraintBottom_toTopOf="@id/btnPickImageFromGallery"
+        app:layout_constraintEnd_toEndOf="@id/tvLoadingError"
+        app:layout_constraintStart_toStartOf="@id/tvLoadingError"
+        app:layout_constraintTop_toBottomOf="@id/tvLoadingError" />
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/errorGroup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:constraint_referenced_ids="tvLoadingError,btnReloadPresets" />
+
+    <Button
+        android:id="@+id/btnPickImageFromGallery"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/big_icon_size"
+        android:backgroundTint="@color/dark_blue"
+        android:text="@string/pick_from_gallery"
+        android:textAllCaps="false"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <com.muroming.postcardeditor.ui.views.editorview.PhotoEditorView
         android:id="@+id/vPhotoEditor"

@@ -1,23 +1,24 @@
 package com.muroming.postcardeditor.ui.fragments
 
-import android.content.ContentResolver
-import android.content.res.Resources
-import android.net.Uri
 import androidx.core.net.toUri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.muroming.postcardeditor.R
-import com.muroming.postcardeditor.data.UserPicture
+import androidx.lifecycle.viewModelScope
+import com.muroming.postcardeditor.data.PresetsRepository
+import com.muroming.postcardeditor.data.dto.UserPicture
+import kotlinx.coroutines.launch
 import java.io.File
 
 class PhotoEditorViewModel : ViewModel() {
+    private val presetsRepository = PresetsRepository()
+
     private val userPictures = MutableLiveData<List<UserPicture>>()
-    private val presets = MutableLiveData<List<UserPicture>>()
+    private val presets = MutableLiveData<CardPresets>(CardPresets.Loading)
     private val editorState = MutableLiveData<EditorState>(EditorState.PRESETS)
 
     fun observeUserPictures(): LiveData<List<UserPicture>> = userPictures
-    fun observePresets(): LiveData<List<UserPicture>> = presets
+    fun observePresets(): LiveData<CardPresets> = presets
     fun observeEditorState(): LiveData<EditorState> = editorState
 
     fun getEditorState() = editorState.value
@@ -30,20 +31,15 @@ class PhotoEditorViewModel : ViewModel() {
         }
         .let(userPictures::setValue)
 
-    fun loadPresets(resources: Resources) {
-        List(USER_PICTURES_COUNT) {
-            val resId = if (it % 2 == 0) R.drawable.k else R.drawable.kek
-
-            UserPicture(
-                Uri.parse(
-                    ContentResolver.SCHEME_ANDROID_RESOURCE + "://" +
-                            resources.getResourcePackageName(resId) + '/' +
-                            resources.getResourceTypeName(resId) + '/' +
-                            resources.getResourceEntryName(resId)
-                )
-            )
+    fun reloadPresets() {
+        viewModelScope.launch {
+            presets.value = CardPresets.Loading
+            try {
+                presets.value = CardPresets.Loaded(presetsRepository.loadPresets())
+            } catch (e: Exception) {
+                presets.value = CardPresets.Error
+            }
         }
-            .let(presets::setValue)
     }
 
     fun onPresetClicked() {
@@ -61,10 +57,5 @@ class PhotoEditorViewModel : ViewModel() {
     fun generateFilePath(directory: File): String {
         val currentCount = directory.listFiles().size
         return "${directory.path}/myPicture${currentCount}.png"
-    }
-
-    companion object {
-        private const val USER_PICTURES_COUNT = 20
-        private val PRESET_REGEX = Regex("preset[0-9]+\\.png")
     }
 }

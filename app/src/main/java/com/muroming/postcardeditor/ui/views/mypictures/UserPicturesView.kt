@@ -7,7 +7,7 @@ import android.view.LayoutInflater
 import android.widget.RelativeLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.muroming.postcardeditor.R
-import com.muroming.postcardeditor.data.UserPicture
+import com.muroming.postcardeditor.data.dto.UserPicture
 import com.muroming.postcardeditor.ui.views.UserPicturesAdapter
 import kotlinx.android.synthetic.main.my_pictures_view.view.*
 

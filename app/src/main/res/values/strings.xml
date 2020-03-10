@@ -3,6 +3,9 @@
     <string name="my_pictures">Мои работы</string>
     <string name="all_pictures">Все</string>
     <string name="presets">Шаблоны</string>
+    <string name="pick_from_gallery">Выбрать фото из галереи</string>
+    <string name="error_loading_presets">Не удалось загрузить шаблоны, попробуйте ещё раз</string>
+    <string name="reload">Перезагрузить</string>
 
     <string name="editor_closing_warning">Все изменения будут утеряны, хотите сохранить?</string>
     <string name="save_picture">Сохранить</string>

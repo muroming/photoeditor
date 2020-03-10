@@ -1,5 +1,7 @@
 package com.muroming.postcardeditor.ui.fragments
 
+import android.content.Intent
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
@@ -10,17 +12,25 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.observe
 import androidx.recyclerview.widget.GridLayoutManager
 import com.muroming.postcardeditor.R
-import com.muroming.postcardeditor.data.UserPicture
+import com.muroming.postcardeditor.data.dto.UserPicture
+import com.muroming.postcardeditor.listeners.OnBackPressedListener
+import com.muroming.postcardeditor.listeners.OnCropFinishedListener
+import com.muroming.postcardeditor.listeners.OnImagePickedListener
 import com.muroming.postcardeditor.ui.views.UserPicturesAdapter
 import com.muroming.postcardeditor.ui.views.editorview.CropStarter
+import com.muroming.postcardeditor.ui.views.editorview.PicassoPhotoTarget
 import com.muroming.postcardeditor.utils.setVisibility
 import com.muroming.postcardeditor.utils.toBitmap
+import com.squareup.picasso.Picasso
 import com.yalantis.ucrop.UCrop
 import kotlinx.android.synthetic.main.fragment_editor.*
 import java.io.File
 
-class PhotoEditorFragment : Fragment(R.layout.fragment_editor), OnBackPressedListener,
-    OnCropFinishedListener, CropStarter {
+class PhotoEditorFragment : Fragment(R.layout.fragment_editor),
+    OnBackPressedListener,
+    OnCropFinishedListener,
+    OnImagePickedListener,
+    CropStarter {
     private val viewModel: PhotoEditorViewModel by viewModels()
 
     private val presetsAdapter: UserPicturesAdapter by lazy {
@@ -35,7 +45,7 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor), OnBackPressedLis
         viewModel.loadUserPictures(requireContext().filesDir)
         viewModel.observeUserPictures().observe(this, vUserPictures::update)
 
-        viewModel.loadPresets(resources)
+        viewModel.reloadPresets()
         viewModel.observePresets().observe(this, ::updatePresets)
         viewModel.observeEditorState().observe(this, ::onEditorStateChanged)
 
@@ -55,15 +65,56 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor), OnBackPressedLis
 
     private fun initListeners() {
         ivBack.setOnClickListener { activity?.onBackPressed() }
+        btnReloadPresets.setOnClickListener { viewModel.reloadPresets() }
+        btnPickImageFromGallery.setOnClickListener {
+            Intent(
+                Intent.ACTION_PICK,
+                android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+            ).let {
+                activity?.startActivityForResult(it, RESULT_PICK_IMAGE)
+            }
+        }
     }
 
-    private fun updatePresets(presets: List<UserPicture>) {
+    private fun updatePresets(presets: CardPresets) {
+        when (presets) {
+            is CardPresets.Loading -> showPresetsLoading()
+            is CardPresets.Error -> showPresetsError()
+            is CardPresets.Loaded -> showPresets(presets.presets)
+        }
+    }
+
+    private fun showPresetsLoading() {
+        rvPresets.setVisibility(false)
+        errorGroup.setVisibility(false)
+        pbLoadingPresets.setVisibility(true)
+    }
+
+    private fun showPresetsError() {
+        rvPresets.setVisibility(false)
+        errorGroup.setVisibility(true)
+        pbLoadingPresets.setVisibility(false)
+    }
+
+    private fun showPresets(presets: List<UserPicture>) {
         presetsAdapter.setItems(presets)
         presetsAdapter.notifyDataSetChanged()
+        rvPresets.setVisibility(true)
+        errorGroup.setVisibility(false)
+        pbLoadingPresets.setVisibility(false)
     }
 
     private fun onPresetClicked(uri: Uri) {
-        val bitmap = uri.toBitmap(requireContext().contentResolver)
+        if (uri.toString().startsWith("http")) {
+            Picasso.get()
+                .load(uri)
+                .into(PicassoPhotoTarget(::openEditor))
+        } else {
+            uri.toBitmap(requireContext().contentResolver).let(::openEditor)
+        }
+    }
+
+    private fun openEditor(bitmap: Bitmap) {
         vPhotoEditor.initEditor(bitmap)
         viewModel.onPresetClicked()
     }
@@ -84,6 +135,7 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor), OnBackPressedLis
         mockIcons.visibility = View.INVISIBLE
         editorMockIcons.setVisibility(true)
         vPhotoEditor.setVisibility(true)
+        btnPickImageFromGallery.setVisibility(false)
     }
 
     private fun showPresets() {
@@ -92,6 +144,7 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor), OnBackPressedLis
 
         rvPresets.setVisibility(true)
         mockIcons.setVisibility(true)
+        btnPickImageFromGallery.setVisibility(true)
         editorMockIcons.setVisibility(false)
         vPhotoEditor.setVisibility(false)
     }
@@ -151,7 +204,13 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor), OnBackPressedLis
         else -> false
     }
 
+    override fun onImagePicked(imageUri: Uri) {
+        onPresetClicked(imageUri)
+    }
+
     companion object {
+        const val RESULT_PICK_IMAGE = 123
+
         const val tempCropSrcFilename = "tempcrop.png"
         private const val tempCropDestFilename = "destcrop.png"
     }

@@ -1,4 +1,4 @@
-package com.muroming.postcardeditor.data
+package com.muroming.postcardeditor.data.dto
 
 import android.net.Uri
 
