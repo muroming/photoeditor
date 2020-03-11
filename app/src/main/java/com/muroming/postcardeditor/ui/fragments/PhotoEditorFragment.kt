@@ -36,7 +36,12 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor),
     private val viewModel: PhotoEditorViewModel by viewModels()
 
     private val presetsAdapter: UserPicturesAdapter by lazy {
-        UserPicturesAdapter(requireContext(), R.layout.item_user_big_picture, ::onPresetClicked)
+        UserPicturesAdapter(
+            requireContext(),
+            R.layout.item_user_big_picture,
+            ::onPresetUriClicked,
+            ::openEditor
+        )
     }
 
     override fun onResume() {
@@ -99,6 +104,12 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor),
                 }
             }
         }
+        ivFill.setOnClickListener {
+            viewModel.onFillClicked(requireContext().resources)
+        }
+        ivMultiply.setOnClickListener {
+            viewModel.onPresetsClicked()
+        }
         ivAllPictures.setOnClickListener {
             Intent(
                 Intent.ACTION_PICK,
@@ -137,14 +148,10 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor),
         pbLoadingPresets.setVisibility(false)
     }
 
-    private fun onPresetClicked(uri: Uri) {
-        if (uri.toString().startsWith("http")) {
-            Picasso.get()
-                .load(uri)
-                .into(PicassoPhotoTarget(::openEditor))
-        } else {
-            uri.toBitmap(requireContext().contentResolver).let(::openEditor)
-        }
+    private fun onPresetUriClicked(uri: Uri) {
+        Picasso.get()
+            .load(uri)
+            .into(PicassoPhotoTarget(::openEditor))
     }
 
     private fun openEditor(bitmap: Bitmap) {
@@ -155,11 +162,11 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor),
     private fun onUserPictureClicked(uri: Uri) {
         if (viewModel.getEditorState() == EditorState.EDITING) {
             SavePictureDialog(
-                onSavePicture = { saveEditedPicture { onPresetClicked(uri) } },
-                onNotSavingPicture = { onPresetClicked(uri) }
+                onSavePicture = { saveEditedPicture { onPresetUriClicked(uri) } },
+                onNotSavingPicture = { onPresetUriClicked(uri) }
             ).show(childFragmentManager, SavePictureDialog.DIALOG_TAG)
         } else {
-            onPresetClicked(uri)
+            onPresetUriClicked(uri)
         }
     }
 
@@ -200,7 +207,7 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor),
 
     private fun onEditorStateChanged(editorState: EditorState) {
         when (editorState) {
-            EditorState.PRESETS -> showPresets()
+            EditorState.FRAME_PRESETS -> showPresets()
             EditorState.EDITING -> showEditor()
         }
     }
@@ -242,7 +249,7 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor),
     }
 
     override fun onImagePicked(imageUri: Uri) {
-        onPresetClicked(imageUri)
+        onPresetUriClicked(imageUri)
     }
 
     companion object {

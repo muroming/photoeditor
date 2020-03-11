@@ -1,6 +1,7 @@
 package com.muroming.postcardeditor.data
 
 import android.net.Uri
+import com.muroming.postcardeditor.data.dto.UriPicture
 import com.muroming.postcardeditor.data.dto.UserPicture
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -15,7 +16,7 @@ class PresetsRepository {
 
     suspend fun loadPresets(): List<UserPicture> {
         return presets.loadPresets()
-                .map { UserPicture(Uri.parse(it)) }
+                .map { UriPicture(Uri.parse(it)) }
     }
 
     companion object {
