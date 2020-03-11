@@ -25,12 +25,7 @@ class UserPicturesView @JvmOverloads constructor(
 
     init {
         LayoutInflater.from(context).inflate(R.layout.my_pictures_view, this, true)
-        initListeners()
         initAdapter()
-    }
-
-    private fun initListeners() {
-
     }
 
     private fun initAdapter() {

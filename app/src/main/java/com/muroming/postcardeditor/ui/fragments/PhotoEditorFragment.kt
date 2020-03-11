@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -24,6 +25,7 @@ import com.muroming.postcardeditor.utils.toBitmap
 import com.squareup.picasso.Picasso
 import com.yalantis.ucrop.UCrop
 import kotlinx.android.synthetic.main.fragment_editor.*
+import kotlinx.android.synthetic.main.my_pictures_view.*
 import java.io.File
 
 class PhotoEditorFragment : Fragment(R.layout.fragment_editor),
@@ -35,6 +37,11 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor),
 
     private val presetsAdapter: UserPicturesAdapter by lazy {
         UserPicturesAdapter(requireContext(), R.layout.item_user_big_picture, ::onPresetClicked)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        clearTempFiles()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -66,7 +73,33 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor),
     private fun initListeners() {
         ivBack.setOnClickListener { activity?.onBackPressed() }
         btnReloadPresets.setOnClickListener { viewModel.reloadPresets() }
-        btnPickImageFromGallery.setOnClickListener {
+        ivShare.setOnClickListener {
+            val srcFile = getTempSrc()
+            vPhotoEditor.saveImage(srcFile.absolutePath) { isSuccessful ->
+                if (isSuccessful) {
+                    val context = requireContext()
+                    val fileUri = FileProvider.getUriForFile(
+                        context,
+                        context.applicationContext.packageName + ".provider",
+                        srcFile
+                    )
+                    val shareIntent: Intent = Intent().apply {
+                        action = Intent.ACTION_SEND
+                        putExtra(Intent.EXTRA_STREAM, fileUri)
+                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        type = "image/*"
+                    }
+                    vPhotoEditor.setCroppedImage(srcFile.toUri().toBitmap(context.contentResolver))
+                    startActivity(
+                        Intent.createChooser(
+                            shareIntent,
+                            resources.getText(R.string.send_to)
+                        )
+                    )
+                }
+            }
+        }
+        ivAllPictures.setOnClickListener {
             Intent(
                 Intent.ACTION_PICK,
                 android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI
@@ -135,7 +168,6 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor),
         mockIcons.visibility = View.INVISIBLE
         editorMockIcons.setVisibility(true)
         vPhotoEditor.setVisibility(true)
-        btnPickImageFromGallery.setVisibility(false)
         errorGroup.setVisibility(false)
     }
 
@@ -145,7 +177,6 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor),
 
         rvPresets.setVisibility(true)
         mockIcons.setVisibility(true)
-        btnPickImageFromGallery.setVisibility(true)
         editorMockIcons.setVisibility(false)
         vPhotoEditor.setVisibility(false)
     }
@@ -187,7 +218,6 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor),
         val bitmap = uri.toBitmap(requireContext().contentResolver)
         vPhotoEditor.setCroppedImage(bitmap)
         getTempDest().takeIf(File::exists)?.delete()
-        getTempSrc().takeIf(File::exists)?.delete()
     }
 
     override fun onCropCanceled() {
@@ -196,6 +226,10 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor),
 
     private fun getTempSrc() = File(requireContext().filesDir, tempCropSrcFilename)
     private fun getTempDest() = File(requireContext().filesDir, tempCropDestFilename)
+
+    private fun clearTempFiles() {
+        getTempSrc().takeIf(File::exists)?.delete()
+    }
 
     override fun onBackPressed(): Boolean = when (viewModel.getEditorState()) {
         EditorState.EDITING -> {
