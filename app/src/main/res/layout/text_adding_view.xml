@@ -17,7 +17,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@null"
-        android:fontFamily="@font/amaranth"
         android:minWidth="200dp"
         android:textSize="@dimen/min_text_size"
         app:layout_constraintBottom_toBottomOf="@id/vInputTextBackground"
@@ -72,7 +71,7 @@
         app:layout_constraintStart_toEndOf="@id/ivBoldText" />
 
     <ImageView
-        android:id="@+id/ivUnderlineText"
+        android:id="@+id/ivOutlineText"
         android:layout_width="@dimen/small_icon_size"
         android:layout_height="@dimen/small_icon_size"
         android:layout_margin="8dp"
@@ -101,9 +100,9 @@
         android:layout_marginStart="4dp"
         android:layout_marginEnd="4dp"
         android:background="@color/dark_blue"
-        app:layout_constraintBottom_toBottomOf="@id/ivUnderlineText"
+        app:layout_constraintBottom_toBottomOf="@id/ivOutlineText"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/ivUnderlineText"
-        app:layout_constraintTop_toTopOf="@id/ivUnderlineText" />
+        app:layout_constraintStart_toEndOf="@id/ivOutlineText"
+        app:layout_constraintTop_toTopOf="@id/ivOutlineText" />
 
 </merge>

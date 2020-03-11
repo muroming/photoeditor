@@ -5,12 +5,16 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Typeface
 import android.util.AttributeSet
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.SeekBar
+import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.children
 import androidx.core.view.isVisible
 import androidx.fragment.app.FragmentManager
 import com.muroming.postcardeditor.R
@@ -36,6 +40,12 @@ class PhotoEditorView @JvmOverloads constructor(
     lateinit var cropStarter: CropStarter
 
     private lateinit var photoEditor: PhotoEditor
+    private val editorAddedViews: List<View> by lazy {
+        PhotoEditor::class.java.getDeclaredField("addedViews").apply {
+            isAccessible = true
+        }.get(photoEditor) as List<View>
+    }
+
     private val minBrushSize = resources.getDimensionPixelSize(R.dimen.min_brush_size)
     private val maxBrushSize = resources.getDimensionPixelSize(R.dimen.max_brush_size)
 
@@ -260,6 +270,7 @@ class PhotoEditorView @JvmOverloads constructor(
         gravity: Int,
         textSize: Float,
         currentColor: Int,
+        textOutlineColor: Int?,
         typeface: Typeface?
     ) {
         if (text.isNotEmpty()) {
@@ -273,6 +284,32 @@ class PhotoEditorView @JvmOverloads constructor(
         }
         vTextAddingView.setInputTextGroupVisibility(false)
         vBrushSlider.setVisibility(isDrawing || isErasing)
+        textOutlineColor?.let { applyOutlineForText(text, textOutlineColor) }
+    }
+
+    private fun applyOutlineForText(text: String, color: Int) {
+        editorAddedViews.mapNotNull {
+            ((it as? ViewGroup)?.children?.first() as? ViewGroup)
+        }
+            .firstOrNull { (it.children.first() as? TextView)?.text == text }
+            ?.apply {
+                val textView = getChildAt(0) as TextView
+                removeViewAt(0)
+                val outlinedText = OutlinedText(context).apply {
+                    setText(text)
+                    gravity = textView.gravity
+                    setTextSize(TypedValue.COMPLEX_UNIT_PX, textView.textSize)
+                    setTextColor(textView.currentTextColor)
+                    typeface = textView.typeface
+                    layoutParams = textView.layoutParams
+                    setStrokeColor(color)
+                    setStrokeWidth(
+                        TypedValue.COMPLEX_UNIT_PX,
+                        textView.textSize / TEXT_OUTLINE_RATIO
+                    )
+                }
+                addView(outlinedText, 0)
+            }
     }
 
     override fun onBackPressed(): Boolean {
@@ -287,6 +324,7 @@ class PhotoEditorView @JvmOverloads constructor(
     }
 
     companion object {
+        const val TEXT_OUTLINE_RATIO = 30L
         private const val BRUSH_SIZE_ANIMATION_DURATION = 150L
     }
 }

@@ -1,7 +1,6 @@
 package com.muroming.postcardeditor.ui.views.textaddingview
 
 import android.content.Context
-import android.graphics.Paint
 import android.graphics.Typeface
 import android.util.AttributeSet
 import android.view.Gravity
@@ -13,8 +12,10 @@ import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.SeekBar
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import com.muroming.postcardeditor.R
+import com.muroming.postcardeditor.ui.views.editorview.PhotoEditorView
 import com.muroming.postcardeditor.utils.setVisibility
 import com.muroming.postcardeditor.utils.toSp
 import kotlinx.android.synthetic.main.text_adding_view.view.*
@@ -27,7 +28,7 @@ class TextAddingView @JvmOverloads constructor(
 
     private var isTextBold = false
     private var isTextItalic = false
-    private var isTextUnderlined = false
+    private var isTextOutlined = false
 
     private val minTextSize = resources.getDimensionPixelSize(R.dimen.min_text_size)
     private val maxTextSize = resources.getDimensionPixelSize(R.dimen.max_text_size)
@@ -88,7 +89,7 @@ class TextAddingView @JvmOverloads constructor(
 
         ivBoldText.setOnClickListener { setInputTextBold() }
         ivItalicText.setOnClickListener { setInputTextItalic() }
-        ivUnderlineText.setOnClickListener { setInputTextUnderlined() }
+        ivOutlineText.setOnClickListener { setInputTextOutlined() }
 
         vInputTextBackground.setOnClickListener {
             textListener.onTextReady(
@@ -96,6 +97,7 @@ class TextAddingView @JvmOverloads constructor(
                 etTextInput.gravity,
                 etTextInput.textSize.toSp(),
                 etTextInput.currentTextColor,
+                if (isTextOutlined) ContextCompat.getColor(context, R.color.red) else null,
                 currentTypeface
             )
         }
@@ -127,12 +129,17 @@ class TextAddingView @JvmOverloads constructor(
         etTextInput.setTypeface(currentTypeface, getTextStyle())
     }
 
-    private fun setInputTextUnderlined() {
-        isTextUnderlined = !isTextUnderlined
-        etTextInput.paintFlags = if (isTextUnderlined) {
-            etTextInput.paintFlags or Paint.UNDERLINE_TEXT_FLAG
+    private fun setInputTextOutlined() {
+        isTextOutlined = !isTextOutlined
+        if (isTextOutlined) {
+            etTextInput.setShadowLayer(
+                etTextInput.textSize / PhotoEditorView.TEXT_OUTLINE_RATIO,
+                0f,0f, ContextCompat.getColor(context, R.color.red)
+            )
         } else {
-            etTextInput.paintFlags xor Paint.UNDERLINE_TEXT_FLAG
+            etTextInput.setShadowLayer(
+                0f, 0f, 0f, 0
+            )
         }
     }
 
@@ -156,16 +163,17 @@ class TextAddingView @JvmOverloads constructor(
     }
 
     private fun EditText.manageFocusWithKeyboard(shouldRequestFocus: Boolean) {
-        handler?.postDelayed({
-            if (shouldRequestFocus) {
-                if (requestFocus()) {
-                    inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0)
+        handler?.postDelayed(
+            {
+                if (shouldRequestFocus) {
+                    if (requestFocus()) {
+                        inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0)
+                    }
+                } else {
+                    clearFocus()
+                    inputMethodManager.hideSoftInputFromWindow(windowToken, 0)
                 }
-            } else {
-                clearFocus()
-                inputMethodManager.hideSoftInputFromWindow(windowToken, 0)
-            }
-        },
+            },
             EDITTEXT_FOCUS_REQUEST_DELAY
         )
     }
@@ -177,10 +185,11 @@ class TextAddingView @JvmOverloads constructor(
         currentTypeface = null
         isTextBold = false
         isTextItalic = false
-        isTextUnderlined = false
+        isTextOutlined = false
+        isTextOutlined = false
         updateTextTypeface()
     }
-    
+
     companion object {
         private const val EDITTEXT_FOCUS_REQUEST_DELAY = 30L
     }

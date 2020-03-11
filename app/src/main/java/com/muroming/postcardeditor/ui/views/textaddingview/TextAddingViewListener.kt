@@ -8,6 +8,7 @@ interface TextAddingViewListener {
         gravity: Int,
         textSize: Float,
         currentColor: Int,
+        textOutlineColor: Int?,
         typeface: Typeface?
     )
 }
