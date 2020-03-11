@@ -136,6 +136,7 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor),
         editorMockIcons.setVisibility(true)
         vPhotoEditor.setVisibility(true)
         btnPickImageFromGallery.setVisibility(false)
+        errorGroup.setVisibility(false)
     }
 
     private fun showPresets() {
