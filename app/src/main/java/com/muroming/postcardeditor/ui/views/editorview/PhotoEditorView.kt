@@ -20,6 +20,7 @@ import com.muroming.postcardeditor.R
 import com.muroming.postcardeditor.listeners.OnBackPressedListener
 import com.muroming.postcardeditor.ui.fragments.PhotoEditorFragment
 import com.muroming.postcardeditor.ui.views.textaddingview.TextAddingViewListener
+import com.muroming.postcardeditor.ui.views.textaddingview.TextViewStyle
 import com.muroming.postcardeditor.utils.setSize
 import com.muroming.postcardeditor.utils.setVisibility
 import dev.sasikanth.colorsheet.ColorSheet
@@ -265,13 +266,13 @@ class PhotoEditorView @JvmOverloads constructor(
     }
 
     override fun onTextReady(
-        id: String,
         text: String,
         gravity: Int,
         textSize: Float,
         currentColor: Int,
         textOutlineColor: Int?,
-        typeface: Typeface?
+        typeface: Typeface?,
+        textStyle: TextViewStyle
     ) {
         if (text.isNotEmpty()) {
             val textStyle = TextStyleBuilder().apply {
@@ -284,10 +285,10 @@ class PhotoEditorView @JvmOverloads constructor(
         }
         vTextAddingView.setInputTextGroupVisibility(false)
         vBrushSlider.setVisibility(isDrawing || isErasing)
-        modifyAddedText(id, text, textOutlineColor)
+        modifyAddedText(text, textStyle, textOutlineColor)
     }
 
-    private fun modifyAddedText(id: String, text: String, outlineColor: Int?) {
+    private fun modifyAddedText(text: String, style: TextViewStyle, outlineColor: Int?) {
         val textHolder = editorAddedViews.mapNotNull {
             ((it as? ViewGroup)?.children?.first() as? ViewGroup)
         }.first { (it.children.first() as? TextView)?.text == text }
@@ -301,22 +302,25 @@ class PhotoEditorView @JvmOverloads constructor(
         }
 
         (textHolder.parent as? ViewGroup)?.let { holderParent ->
-            val deleteImage = (holderParent.children
-                .first { it is ImageView }
-                .layoutParams as FrameLayout.LayoutParams)
+            val deleteImage = (holderParent.children.first { it is ImageView })
+
+            val deleteImageParams = deleteImage.layoutParams as FrameLayout.LayoutParams
 
             val editImage = ImageView(context).apply {
                 layoutParams = FrameLayout.LayoutParams(0, 0).apply {
-                    width = deleteImage.width
-                    height = deleteImage.height
+                    width = deleteImageParams.width
+                    height = deleteImageParams.height
                     gravity = Gravity.END or Gravity.TOP
                 }
                 setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_edit))
             }
+            deleteImage.viewTreeObserver.addOnGlobalLayoutListener {
+                editImage.visibility = deleteImage.visibility
+            }
             editImage.setOnClickListener {
                 photoEditorView.removeView(holderParent)
                 editorAddedViews.remove(holderParent)
-                vTextAddingView.editText(id, textHolder)
+                vTextAddingView.editText(textHolder, style)
             }
 
             holderParent.addView(editImage)

@@ -21,7 +21,6 @@ import com.muroming.postcardeditor.utils.setVisibility
 import com.muroming.postcardeditor.utils.toSp
 import dev.sasikanth.colorsheet.ColorSheet
 import kotlinx.android.synthetic.main.text_adding_view.view.*
-import java.util.*
 
 class TextAddingView @JvmOverloads constructor(
     context: Context,
@@ -41,8 +40,6 @@ class TextAddingView @JvmOverloads constructor(
     private val maxTextSize = resources.getDimensionPixelSize(R.dimen.max_text_size)
     private var currentTypeface: Int? = null
     private var editedTextHolder: ViewGroup? = null
-
-    private val textStyles = mutableMapOf<String, Pair<Int?, Int>>()
 
     private val inputMethodManager: InputMethodManager =
         context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -105,17 +102,14 @@ class TextAddingView @JvmOverloads constructor(
         ivOutlineText.setOnLongClickListener { selectOutlineColor(); true; }
 
         vInputTextBackground.setOnClickListener {
-
-            val id = UUID.randomUUID().toString()
-            textStyles[id] = currentTypeface to getTextStyle()
             textListener.onTextReady(
-                id,
                 etTextInput.text.toString(),
                 etTextInput.gravity,
                 etTextInput.textSize.toSp(),
                 etTextInput.currentTextColor,
                 if (isTextOutlined) selectedOutlineColor else null,
-                etTextInput.typeface
+                etTextInput.typeface,
+                TextViewStyle(currentTypeface, isTextBold, isTextItalic)
             )
         }
         vTextSizeSlider.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
@@ -212,16 +206,14 @@ class TextAddingView @JvmOverloads constructor(
         if (editedTextHolder == null) {
             setInputTextGroupVisibility(false)
         } else {
-            val id = UUID.randomUUID().toString()
-            textStyles[id] = currentTypeface to getTextStyle()
             textListener.onTextReady(
-                id,
                 etTextInput.text.toString(),
                 etTextInput.gravity,
                 etTextInput.textSize.toSp(),
                 etTextInput.currentTextColor,
                 if (isTextOutlined) selectedOutlineColor else null,
-                etTextInput.typeface
+                etTextInput.typeface,
+                TextViewStyle(currentTypeface, isTextBold, isTextItalic)
             )
         }
     }
@@ -257,7 +249,7 @@ class TextAddingView @JvmOverloads constructor(
         setTypeface(null, Typeface.NORMAL)
     }
 
-    fun editText(id: String, textHolder: ViewGroup) {
+    fun editText(textHolder: ViewGroup, textStyle: TextViewStyle) {
         setInputTextGroupVisibility(true)
         val textView = textHolder.children.first() as TextView
         editedTextHolder = textHolder
@@ -276,15 +268,15 @@ class TextAddingView @JvmOverloads constructor(
                 )
             }
         }
-        val (textFont, style) = textStyles[id]!!
-        initFromStyle(style)
-        currentTypeface = textFont
+        currentTypeface = textStyle.typeface
+        isTextBold = textStyle.isBold
+        isTextItalic = textStyle.isItalic
+
         val fontIndex = editorFonts.indexOfFirst { (_, font) ->
-            textFont == font
+            currentTypeface == font
         }
         vTypefacesSpinner.setSelection(fontIndex)
         updateTextTypeface()
-        textStyles.remove(id)
     }
 
     companion object {

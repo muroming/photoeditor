@@ -4,12 +4,12 @@ import android.graphics.Typeface
 
 interface TextAddingViewListener {
     fun onTextReady(
-        id: String,
         text: String,
         gravity: Int,
         textSize: Float,
         currentColor: Int,
         textOutlineColor: Int?,
-        typeface: Typeface?
+        typeface: Typeface?,
+        textStyle: TextViewStyle
     )
 }
