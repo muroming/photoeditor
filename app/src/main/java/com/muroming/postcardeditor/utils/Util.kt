@@ -25,7 +25,8 @@ fun View.setVisibility(isVisible: Boolean) {
     visibility = if (!isVisible) View.GONE else View.VISIBLE
 }
 
-fun Uri.toBitmap(resolver: ContentResolver): Bitmap = MediaStore.Images.Media.getBitmap(resolver, this)
+fun Uri.toBitmap(resolver: ContentResolver): Bitmap =
+    MediaStore.Images.Media.getBitmap(resolver, this)
 
 fun GradientDrawable.toBitmap(): Bitmap {
     val bitmap = Bitmap.createBitmap(intrinsicWidth, intrinsicHeight, Bitmap.Config.ARGB_8888)

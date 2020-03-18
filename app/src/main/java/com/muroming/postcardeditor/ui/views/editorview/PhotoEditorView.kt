@@ -6,14 +6,13 @@ import android.graphics.Color
 import android.graphics.Typeface
 import android.util.AttributeSet
 import android.util.TypedValue
-import android.view.LayoutInflater
-import android.view.MotionEvent
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import androidx.core.view.children
 import androidx.core.view.isVisible
 import androidx.fragment.app.FragmentManager
@@ -40,10 +39,10 @@ class PhotoEditorView @JvmOverloads constructor(
     lateinit var cropStarter: CropStarter
 
     private lateinit var photoEditor: PhotoEditor
-    private val editorAddedViews: List<View> by lazy {
+    private val editorAddedViews by lazy {
         PhotoEditor::class.java.getDeclaredField("addedViews").apply {
             isAccessible = true
-        }.get(photoEditor) as List<View>
+        }.get(photoEditor) as MutableList<View>
     }
 
     private val minBrushSize = resources.getDimensionPixelSize(R.dimen.min_brush_size)
@@ -266,6 +265,7 @@ class PhotoEditorView @JvmOverloads constructor(
     }
 
     override fun onTextReady(
+        id: String,
         text: String,
         gravity: Int,
         textSize: Float,
@@ -284,40 +284,66 @@ class PhotoEditorView @JvmOverloads constructor(
         }
         vTextAddingView.setInputTextGroupVisibility(false)
         vBrushSlider.setVisibility(isDrawing || isErasing)
-        textOutlineColor?.let { applyOutlineForText(text, textOutlineColor) }
+        modifyAddedText(id, text, textOutlineColor)
     }
 
-    private fun applyOutlineForText(text: String, color: Int) {
-        editorAddedViews.mapNotNull {
+    private fun modifyAddedText(id: String, text: String, outlineColor: Int?) {
+        val textHolder = editorAddedViews.mapNotNull {
             ((it as? ViewGroup)?.children?.first() as? ViewGroup)
+        }.first { (it.children.first() as? TextView)?.text == text }
+
+
+        outlineColor?.let {
+            val textView = textHolder.getChildAt(0) as TextView
+            textHolder.removeViewAt(0)
+            val outlinedText = copyTextWithOutline(textView, outlineColor)
+            textHolder.addView(outlinedText, 0)
         }
-            .firstOrNull { (it.children.first() as? TextView)?.text == text }
-            ?.apply {
-                val textView = getChildAt(0) as TextView
-                removeViewAt(0)
-                val outlinedText = OutlinedText(context).apply {
-                    setText(text)
-                    gravity = textView.gravity
-                    setTextSize(TypedValue.COMPLEX_UNIT_PX, textView.textSize)
-                    setTextColor(textView.currentTextColor)
-                    typeface = textView.typeface
-                    layoutParams = textView.layoutParams
-                    setStrokeColor(color)
-                    setStrokeWidth(
-                        TypedValue.COMPLEX_UNIT_PX,
-                        textView.textSize / TEXT_OUTLINE_RATIO
-                    )
+
+        (textHolder.parent as? ViewGroup)?.let { holderParent ->
+            val deleteImage = (holderParent.children
+                .first { it is ImageView }
+                .layoutParams as FrameLayout.LayoutParams)
+
+            val editImage = ImageView(context).apply {
+                layoutParams = FrameLayout.LayoutParams(0, 0).apply {
+                    width = deleteImage.width
+                    height = deleteImage.height
+                    gravity = Gravity.END or Gravity.TOP
                 }
-                addView(outlinedText, 0)
+                setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_edit))
             }
+            editImage.setOnClickListener {
+                photoEditorView.removeView(holderParent)
+                editorAddedViews.remove(holderParent)
+                vTextAddingView.editText(id, textHolder)
+            }
+
+            holderParent.addView(editImage)
+        }
     }
+
+    private fun copyTextWithOutline(textView: TextView, outlineColor: Int) =
+        OutlinedText(context).apply {
+            text = textView.text
+            gravity = textView.gravity
+            setTextSize(TypedValue.COMPLEX_UNIT_PX, textView.textSize)
+            setTextColor(textView.currentTextColor)
+            typeface = textView.typeface
+            layoutParams = textView.layoutParams
+            strokeColor = outlineColor
+            setStrokeWidth(
+                TypedValue.COMPLEX_UNIT_PX,
+                textView.textSize / TEXT_OUTLINE_RATIO
+            )
+        }
 
     override fun onBackPressed(): Boolean {
         val intercepting = isDrawing || isErasing || vTextAddingView.isVisible
         when {
             isDrawing -> onBrushClicked(null)
             isErasing -> onEraserClicked(null)
-            vTextAddingView.isVisible -> vTextAddingView.setInputTextGroupVisibility(false)
+            vTextAddingView.isVisible -> vTextAddingView.onBackPressed()
         }
 
         return intercepting

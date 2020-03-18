@@ -12,7 +12,7 @@
         app:layout_constraintBottom_toBottomOf="@id/photoEditorView"
         app:layout_constraintTop_toTopOf="@id/photoEditorView" />
 
-    <EditText
+    <androidx.appcompat.widget.AppCompatEditText
         android:id="@+id/etTextInput"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

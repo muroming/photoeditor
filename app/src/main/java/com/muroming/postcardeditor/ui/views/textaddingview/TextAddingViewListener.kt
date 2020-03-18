@@ -4,6 +4,7 @@ import android.graphics.Typeface
 
 interface TextAddingViewListener {
     fun onTextReady(
+        id: String,
         text: String,
         gravity: Int,
         textSize: Float,

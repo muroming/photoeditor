@@ -5,21 +5,21 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.util.AttributeSet
 import android.util.TypedValue
-import android.widget.TextView
+import androidx.appcompat.widget.AppCompatTextView
 import com.muroming.postcardeditor.utils.spToPx
 
 class OutlinedText @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
-) : TextView(context, attrs, defStyleAttr) {
+) : AppCompatTextView(context, attrs, defStyleAttr) {
 
-    private var _strokeColor: Int = 0
+    var strokeColor: Int = 0
     private var _strokeWidth: Float = 0.toFloat()
     private var isDrawing: Boolean = false
 
     init {
-        _strokeColor = currentTextColor
+        strokeColor = currentTextColor
         _strokeWidth = DEFAULT_STROKE_WIDTH.toFloat()
         setStrokeWidth(_strokeWidth)
     }
@@ -27,10 +27,6 @@ class OutlinedText @JvmOverloads constructor(
     override fun invalidate() {
         if (isDrawing) return
         super.invalidate()
-    }
-
-    fun setStrokeColor(color: Int) {
-        _strokeColor = color
     }
 
     private fun setStrokeWidth(width: Float) {
@@ -58,7 +54,7 @@ class OutlinedText @JvmOverloads constructor(
             //stroke color and width
             p.style = Paint.Style.STROKE
             p.strokeWidth = _strokeWidth
-            setTextColor(_strokeColor)
+            setTextColor(strokeColor)
             //draw text stroke
             super.onDraw(canvas)
             //revert the color back to the one

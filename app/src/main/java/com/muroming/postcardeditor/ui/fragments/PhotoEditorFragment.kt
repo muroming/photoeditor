@@ -17,6 +17,7 @@ import com.muroming.postcardeditor.data.dto.UserPicture
 import com.muroming.postcardeditor.listeners.OnBackPressedListener
 import com.muroming.postcardeditor.listeners.OnCropFinishedListener
 import com.muroming.postcardeditor.listeners.OnImagePickedListener
+import com.muroming.postcardeditor.listeners.OnKeyboardShownListener
 import com.muroming.postcardeditor.ui.views.UserPicturesAdapter
 import com.muroming.postcardeditor.ui.views.editorview.CropStarter
 import com.muroming.postcardeditor.ui.views.editorview.PicassoPhotoTarget
@@ -26,12 +27,14 @@ import com.squareup.picasso.Picasso
 import com.yalantis.ucrop.UCrop
 import kotlinx.android.synthetic.main.fragment_editor.*
 import kotlinx.android.synthetic.main.my_pictures_view.*
+import kotlinx.android.synthetic.main.photo_editor_view.*
 import java.io.File
 
 class PhotoEditorFragment : Fragment(R.layout.fragment_editor),
     OnBackPressedListener,
     OnCropFinishedListener,
     OnImagePickedListener,
+    OnKeyboardShownListener,
     CropStarter {
     private val viewModel: PhotoEditorViewModel by viewModels()
 
@@ -65,6 +68,8 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor),
             fragmentManager = childFragmentManager
             cropStarter = this@PhotoEditorFragment
         }
+        vTextAddingView.fragmentManager = childFragmentManager
+        vTextAddingView.keyboardListener = this
         vUserPictures.onUserPictureClicked = ::onUserPictureClicked
     }
 
@@ -250,6 +255,20 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor),
 
     override fun onImagePicked(imageUri: Uri) {
         onPresetUriClicked(imageUri)
+    }
+
+    override fun onKeyboardVisible() {
+        editorMockIcons.setVisibility(false)
+        vUserPictures.setVisibility(false)
+        ivPresets.setVisibility(false)
+        tvPresets.setVisibility(false)
+    }
+
+    override fun onKeyboardHidden() {
+        editorMockIcons.setVisibility(true)
+        vUserPictures.setVisibility(true)
+        ivPresets.setVisibility(true)
+        tvPresets.setVisibility(true)
     }
 
     companion object {
