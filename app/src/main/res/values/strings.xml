@@ -11,4 +11,7 @@
     <string name="save_picture">Сохранить</string>
     <string name="dont_save_picture">Не сохранять</string>
     <string name="dismiss_dialog">Закрыть</string>
+
+    <string name="letters_spacing">Межбуквенный интервал</string>
+    <string name="text_height">Высота строки</string>
 </resources>

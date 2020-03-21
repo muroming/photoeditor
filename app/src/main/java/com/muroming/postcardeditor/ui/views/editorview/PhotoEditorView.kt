@@ -21,6 +21,7 @@ import com.muroming.postcardeditor.listeners.OnBackPressedListener
 import com.muroming.postcardeditor.ui.fragments.PhotoEditorFragment
 import com.muroming.postcardeditor.ui.views.textaddingview.TextAddingViewListener
 import com.muroming.postcardeditor.ui.views.textaddingview.TextViewStyle
+import com.muroming.postcardeditor.utils.applyStyle
 import com.muroming.postcardeditor.utils.setSize
 import com.muroming.postcardeditor.utils.setVisibility
 import dev.sasikanth.colorsheet.ColorSheet
@@ -191,6 +192,7 @@ class PhotoEditorView @JvmOverloads constructor(
     }
 
     fun saveImage(filepath: String, onSuccess: (Boolean) -> Unit) {
+        hideAllEditButtons()
         photoEditor.saveAsFile(
             filepath,
             PhotoSaveListener({ onSuccess(true) }, { onSuccess(false) })
@@ -225,6 +227,7 @@ class PhotoEditorView @JvmOverloads constructor(
 
     private fun onCropClicked(view: ImageView) {
         pbCropLoading.setVisibility(true)
+        hideAllEditButtons()
         photoEditor.saveAsFile(getTempSrcPath(), PhotoSaveListener(
             onSaved = {
                 pbCropLoading.setVisibility(false)
@@ -301,6 +304,8 @@ class PhotoEditorView @JvmOverloads constructor(
             textHolder.addView(outlinedText, 0)
         }
 
+        (textHolder.getChildAt(0) as TextView).applyStyle(style)
+
         (textHolder.parent as? ViewGroup)?.let { holderParent ->
             val deleteImage = (holderParent.children.first { it is ImageView })
 
@@ -325,6 +330,15 @@ class PhotoEditorView @JvmOverloads constructor(
 
             holderParent.addView(editImage)
         }
+    }
+
+    private fun hideAllEditButtons() {
+        photoEditorView.children
+            .filterIsInstance<FrameLayout>()
+            .map { it.children.last() }
+            .forEach {
+                it.setVisibility(false)
+            }
     }
 
     private fun copyTextWithOutline(textView: TextView, outlineColor: Int) =

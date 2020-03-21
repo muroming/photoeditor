@@ -9,6 +9,8 @@ import android.graphics.drawable.GradientDrawable
 import android.net.Uri
 import android.provider.MediaStore
 import android.view.View
+import android.widget.TextView
+import com.muroming.postcardeditor.ui.views.textaddingview.TextViewStyle
 
 fun Float.toSp() = this / Resources.getSystem().displayMetrics.scaledDensity
 
@@ -36,4 +38,9 @@ fun GradientDrawable.toBitmap(): Bitmap {
     isFilterBitmap = true
     draw(canvas)
     return bitmap
+}
+
+fun TextView.applyStyle(style: TextViewStyle) {
+    letterSpacing = style.letterSpacing
+    scaleY = style.scaleY
 }

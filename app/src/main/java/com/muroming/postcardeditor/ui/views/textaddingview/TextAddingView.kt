@@ -17,6 +17,7 @@ import androidx.fragment.app.FragmentManager
 import com.muroming.postcardeditor.R
 import com.muroming.postcardeditor.listeners.OnKeyboardShownListener
 import com.muroming.postcardeditor.ui.views.editorview.OutlinedText
+import com.muroming.postcardeditor.utils.applyStyle
 import com.muroming.postcardeditor.utils.setVisibility
 import com.muroming.postcardeditor.utils.toSp
 import dev.sasikanth.colorsheet.ColorSheet
@@ -36,8 +37,15 @@ class TextAddingView @JvmOverloads constructor(
     private var isTextOutlined = false
     private var selectedOutlineColor = ContextCompat.getColor(context, R.color.red)
 
-    private val minTextSize = resources.getDimensionPixelSize(R.dimen.min_text_size)
-    private val maxTextSize = resources.getDimensionPixelSize(R.dimen.max_text_size)
+    private val minTextSize = resources.getDimensionPixelSize(R.dimen.min_text_size).toFloat()
+    private val maxTextSize = resources.getDimensionPixelSize(R.dimen.max_text_size).toFloat()
+
+    private val minTextHeightScale = 1f
+    private val maxTextHeightScale = 2f
+
+    private val minTextSpacing = 0f
+    private val maxTextSpacing = 1f
+
     private var currentTypeface: Int? = null
     private var editedTextHolder: ViewGroup? = null
 
@@ -45,7 +53,7 @@ class TextAddingView @JvmOverloads constructor(
         context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
 
     private val editorFonts = listOf(
-        "Default" to null,
+        "Обычный" to null,
         "Amaranth" to R.font.amaranth,
         "Elysium" to R.font.elysium,
         "Honey Beeg" to R.font.honey_beeg,
@@ -109,21 +117,33 @@ class TextAddingView @JvmOverloads constructor(
                 etTextInput.currentTextColor,
                 if (isTextOutlined) selectedOutlineColor else null,
                 etTextInput.typeface,
-                TextViewStyle(currentTypeface, isTextBold, isTextItalic)
+                TextViewStyle(currentTypeface, isTextBold, isTextItalic, etTextInput.scaleY, etTextInput.letterSpacing)
             )
         }
-        vTextSizeSlider.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                seekBar?.takeIf { fromUser }?.let {
-                    etTextInput.textSize =
-                        minTextSize + (progress.toFloat() / 100) * (maxTextSize - minTextSize)
-                }
+        vTextSizeSlider.setOnSeekBarChangeListener(
+            SeekBarListener(
+                minTextSize,
+                maxTextSize
+            ) { value ->
+                etTextInput.textSize = value
+            })
+        vSpacingSlider.setOnSeekBarChangeListener(
+            SeekBarListener(
+                minTextSpacing,
+                maxTextSpacing
+            ) { value ->
+                etTextInput.letterSpacing = value
             }
+        )
 
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-
-            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
-        })
+        vTextHeightSlider.setOnSeekBarChangeListener(
+            SeekBarListener(
+                minTextHeightScale,
+                maxTextHeightScale
+            ) { value ->
+                etTextInput.scaleY = value
+            }
+        )
     }
 
     private fun selectOutlineColor() {
@@ -172,23 +192,6 @@ class TextAddingView @JvmOverloads constructor(
         if (isTextItalic) Typeface.ITALIC else Typeface.NORMAL
     }
 
-    private fun initFromStyle(style: Int) {
-        when (style) {
-            Typeface.BOLD_ITALIC -> {
-                isTextItalic = true; isTextBold = true
-            }
-            Typeface.BOLD -> {
-                isTextItalic = false; isTextBold = true
-            }
-            Typeface.ITALIC -> {
-                isTextItalic = true; isTextBold = false
-            }
-            Typeface.NORMAL -> {
-                isTextItalic = false; isTextBold = false
-            }
-        }
-    }
-
     fun setInputTextGroupVisibility(isVisible: Boolean) {
         setVisibility(isVisible)
         etTextInput.apply {
@@ -213,7 +216,7 @@ class TextAddingView @JvmOverloads constructor(
                 etTextInput.currentTextColor,
                 if (isTextOutlined) selectedOutlineColor else null,
                 etTextInput.typeface,
-                TextViewStyle(currentTypeface, isTextBold, isTextItalic)
+                TextViewStyle(currentTypeface, isTextBold, isTextItalic, etTextInput.scaleY, etTextInput.letterSpacing)
             )
         }
     }
@@ -238,7 +241,9 @@ class TextAddingView @JvmOverloads constructor(
 
     private fun EditText.resetInputText() {
         setText("")
-        textSize = minTextSize.toFloat()
+        textSize = minTextSize
+        scaleY = 1f
+        letterSpacing = 0f
         gravity = Gravity.START
         etTextInput.setShadowLayer(0f, 0f, 0f, 0)
         currentTypeface = null
@@ -258,6 +263,7 @@ class TextAddingView @JvmOverloads constructor(
             setText(textView.text)
             textSize = textView.textSize.toSp()
             gravity = textView.gravity
+            applyStyle(textStyle)
             if (textView is OutlinedText) {
                 isTextOutlined = true
                 selectedOutlineColor = textView.strokeColor
