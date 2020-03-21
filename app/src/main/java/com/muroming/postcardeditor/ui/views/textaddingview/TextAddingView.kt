@@ -252,6 +252,7 @@ class TextAddingView @JvmOverloads constructor(
         isTextItalic = false
         isTextOutlined = false
         setTypeface(null, Typeface.NORMAL)
+        setSlidersValues()
     }
 
     fun editText(textHolder: ViewGroup, textStyle: TextViewStyle) {
@@ -283,6 +284,17 @@ class TextAddingView @JvmOverloads constructor(
         }
         vTypefacesSpinner.setSelection(fontIndex)
         updateTextTypeface()
+        setSlidersValues()
+    }
+
+    private fun setSlidersValues() {
+        val textSizeValue = (etTextInput.textSize.toSp() - minTextSize) / (maxTextSize - minTextSize) * 100
+        val spacingValue = (etTextInput.letterSpacing - minTextSpacing) / (maxTextSpacing - minTextSpacing) * 100
+        val scaleYValue = (etTextInput.scaleY - minTextHeightScale) / (maxTextHeightScale - minTextHeightScale) * 100
+
+        vTextSizeSlider.progress = textSizeValue.toInt()
+        vSpacingSlider.progress = spacingValue.toInt()
+        vTextHeightSlider.progress = scaleYValue.toInt()
     }
 
     companion object {
