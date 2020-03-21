@@ -76,7 +76,7 @@ class PhotoEditorViewModel : ViewModel() {
         editorState.value = EditorState.FRAME_PRESETS
     }
 
-    fun onFinishedEdeting() {
+    fun onFinishedEditing() {
         editorState.value = EditorState.FRAME_PRESETS
     }
 

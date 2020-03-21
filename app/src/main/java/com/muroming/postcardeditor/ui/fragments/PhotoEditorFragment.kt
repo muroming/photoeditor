@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
+import androidx.core.net.toFile
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -37,6 +38,8 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor),
     OnKeyboardShownListener,
     CropStarter {
     private val viewModel: PhotoEditorViewModel by viewModels()
+
+    private var currentFile: File? = null
 
     private val presetsAdapter: UserPicturesAdapter by lazy {
         UserPicturesAdapter(
@@ -115,6 +118,12 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor),
         ivMultiply.setOnClickListener {
             viewModel.onPresetsClicked()
         }
+        ivDelete.setOnClickListener {
+            currentFile?.takeIf(File::exists)?.let {
+                it.delete()
+                viewModel.onFinishedEditing()
+            }
+        }
         ivAllPictures.setOnClickListener {
             Intent(
                 Intent.ACTION_PICK,
@@ -156,7 +165,10 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor),
     private fun onPresetUriClicked(uri: Uri) {
         Picasso.get()
             .load(uri)
-            .into(PicassoPhotoTarget(::openEditor))
+            .into(PicassoPhotoTarget { bitmap ->
+                currentFile = uri.takeIf { uri.scheme == "file"}?.toFile()
+                openEditor(bitmap)
+            })
     }
 
     private fun openEditor(bitmap: Bitmap) {
@@ -185,6 +197,7 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor),
 
     private fun showPresets() {
         vPhotoEditor.clearEditor()
+        currentFile = null
         viewModel.loadUserPictures(requireContext().filesDir)
 
         rvPresets.setVisibility(true)
@@ -196,7 +209,7 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor),
     private fun showSavingDialog() {
         SavePictureDialog(
             onSavePicture = { saveEditedPicture { viewModel.onSavingComplete() } },
-            onNotSavingPicture = { viewModel.onFinishedEdeting() }
+            onNotSavingPicture = { viewModel.onFinishedEditing() }
         ).show(childFragmentManager, SavePictureDialog.DIALOG_TAG)
     }
 
@@ -254,6 +267,7 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor),
     }
 
     override fun onImagePicked(imageUri: Uri) {
+        vPhotoEditor.clearEditor()
         onPresetUriClicked(imageUri)
     }
 
