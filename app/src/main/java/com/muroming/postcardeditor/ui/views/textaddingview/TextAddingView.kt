@@ -8,19 +8,22 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
-import android.widget.*
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.EditText
+import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.children
-import androidx.fragment.app.FragmentManager
+import androidx.core.view.isVisible
 import com.muroming.postcardeditor.R
 import com.muroming.postcardeditor.listeners.OnKeyboardShownListener
+import com.muroming.postcardeditor.ui.views.colorpicker.ColorPicker
 import com.muroming.postcardeditor.ui.views.editorview.OutlinedText
 import com.muroming.postcardeditor.utils.applyStyle
 import com.muroming.postcardeditor.utils.setVisibility
 import com.muroming.postcardeditor.utils.toSp
-import dev.sasikanth.colorsheet.ColorSheet
 import kotlinx.android.synthetic.main.text_adding_view.view.*
 
 class TextAddingView @JvmOverloads constructor(
@@ -29,7 +32,6 @@ class TextAddingView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : ConstraintLayout(context, attrs, defStyleAttr) {
 
-    lateinit var fragmentManager: FragmentManager
     lateinit var keyboardListener: OnKeyboardShownListener
 
     private var isTextBold = false
@@ -117,7 +119,7 @@ class TextAddingView @JvmOverloads constructor(
                 etTextInput.currentTextColor,
                 if (isTextOutlined) selectedOutlineColor else null,
                 etTextInput.typeface,
-                TextViewStyle(currentTypeface, isTextBold, isTextItalic, etTextInput.scaleY, etTextInput.letterSpacing)
+                TextViewStyle(currentTypeface, isTextBold, isTextItalic, etTextInput.lineSpacingMultiplier, etTextInput.letterSpacing)
             )
         }
         vTextSizeSlider.setOnSeekBarChangeListener(
@@ -141,20 +143,16 @@ class TextAddingView @JvmOverloads constructor(
                 minTextHeightScale,
                 maxTextHeightScale
             ) { value ->
-                etTextInput.scaleY = value
+                etTextInput.setLineSpacing(0f, value)
             }
         )
     }
 
     private fun selectOutlineColor() {
-        ColorSheet().colorPicker(
-            colors = resources.getIntArray(R.array.paletteColors),
-            selectedColor = selectedOutlineColor,
-            noColorOption = false
-        ) { newColor ->
+        ColorPicker(context){ newColor ->
             selectedOutlineColor = newColor
             setInputTextOutlined()
-        }.show(fragmentManager)
+        }.show()
     }
 
     private fun setInputTextBold() {
@@ -199,6 +197,7 @@ class TextAddingView @JvmOverloads constructor(
             manageFocusWithKeyboard(isVisible)
         }
         vTypefacesSpinner.setSelection(0)
+        intervalsGroup.setVisibility(false)
     }
 
     fun setTextColor(color: Int) {
@@ -216,7 +215,7 @@ class TextAddingView @JvmOverloads constructor(
                 etTextInput.currentTextColor,
                 if (isTextOutlined) selectedOutlineColor else null,
                 etTextInput.typeface,
-                TextViewStyle(currentTypeface, isTextBold, isTextItalic, etTextInput.scaleY, etTextInput.letterSpacing)
+                TextViewStyle(currentTypeface, isTextBold, isTextItalic, etTextInput.lineSpacingMultiplier, etTextInput.letterSpacing)
             )
         }
     }
@@ -245,6 +244,7 @@ class TextAddingView @JvmOverloads constructor(
         scaleY = 1f
         letterSpacing = 0f
         gravity = Gravity.START
+        etTextInput.setTextColor(0)
         etTextInput.setShadowLayer(0f, 0f, 0f, 0)
         currentTypeface = null
         editedTextHolder = null
@@ -290,11 +290,17 @@ class TextAddingView @JvmOverloads constructor(
     private fun setSlidersValues() {
         val textSizeValue = (etTextInput.textSize.toSp() - minTextSize) / (maxTextSize - minTextSize) * 100
         val spacingValue = (etTextInput.letterSpacing - minTextSpacing) / (maxTextSpacing - minTextSpacing) * 100
-        val scaleYValue = (etTextInput.scaleY - minTextHeightScale) / (maxTextHeightScale - minTextHeightScale) * 100
+        val scaleYValue = (etTextInput.lineSpacingMultiplier - minTextHeightScale) / (maxTextHeightScale - minTextHeightScale) * 100
 
         vTextSizeSlider.progress = textSizeValue.toInt()
         vSpacingSlider.progress = spacingValue.toInt()
         vTextHeightSlider.progress = scaleYValue.toInt()
+    }
+
+    fun onIntervalsClicked() {
+        if (isVisible) {
+            intervalsGroup.setVisibility(intervalsGroup.isVisible.not())
+        }
     }
 
     companion object {

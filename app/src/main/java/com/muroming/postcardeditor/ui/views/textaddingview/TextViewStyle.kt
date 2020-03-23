@@ -4,6 +4,6 @@ data class TextViewStyle(
     val typeface: Int?,
     val isBold: Boolean,
     val isItalic: Boolean,
-    val scaleY: Float,
+    val linesSpacingMult: Float,
     val letterSpacing: Float
 )

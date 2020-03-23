@@ -42,5 +42,5 @@ fun GradientDrawable.toBitmap(): Bitmap {
 
 fun TextView.applyStyle(style: TextViewStyle) {
     letterSpacing = style.letterSpacing
-    scaleY = style.scaleY
+    setLineSpacing(0f, style.linesSpacingMult)
 }

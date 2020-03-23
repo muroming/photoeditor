@@ -15,16 +15,15 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.children
 import androidx.core.view.isVisible
-import androidx.fragment.app.FragmentManager
 import com.muroming.postcardeditor.R
 import com.muroming.postcardeditor.listeners.OnBackPressedListener
 import com.muroming.postcardeditor.ui.fragments.PhotoEditorFragment
+import com.muroming.postcardeditor.ui.views.colorpicker.ColorPicker
 import com.muroming.postcardeditor.ui.views.textaddingview.TextAddingViewListener
 import com.muroming.postcardeditor.ui.views.textaddingview.TextViewStyle
 import com.muroming.postcardeditor.utils.applyStyle
 import com.muroming.postcardeditor.utils.setSize
 import com.muroming.postcardeditor.utils.setVisibility
-import dev.sasikanth.colorsheet.ColorSheet
 import ja.burhanrashid52.photoeditor.PhotoEditor
 import ja.burhanrashid52.photoeditor.TextStyleBuilder
 import kotlinx.android.synthetic.main.photo_editor_view.view.*
@@ -37,7 +36,6 @@ class PhotoEditorView @JvmOverloads constructor(
 ) : ConstraintLayout(context, attrs, defStyleAttr),
     TextAddingViewListener, OnBackPressedListener {
 
-    lateinit var fragmentManager: FragmentManager
     lateinit var cropStarter: CropStarter
 
     private lateinit var photoEditor: PhotoEditor
@@ -205,16 +203,12 @@ class PhotoEditorView @JvmOverloads constructor(
     }
 
     private fun onPaletteClicked(view: ImageView) {
-        ColorSheet().colorPicker(
-            colors = colorPalette,
-            selectedColor = selectedColor,
-            noColorOption = false
-        ) { newColor ->
+        ColorPicker(context) { newColor ->
             selectedColor = newColor
             photoEditor.brushColor = selectedColor
             vTextAddingView.setTextColor(selectedColor)
             photoEditor.setBrushDrawingMode(isDrawing)
-        }.show(fragmentManager)
+        }.show()
     }
 
     private fun onUndoClicked(view: ImageView) {
@@ -246,7 +240,9 @@ class PhotoEditorView @JvmOverloads constructor(
 
     private fun onFrameClicked(view: ImageView) {}
 
-    private fun onWandClicked(view: ImageView) {}
+    private fun onWandClicked(view: ImageView) {
+        vTextAddingView.onIntervalsClicked()
+    }
 
     private fun onBrushClicked(view: ImageView?) {
         isDrawing = !isDrawing
@@ -294,7 +290,7 @@ class PhotoEditorView @JvmOverloads constructor(
     private fun modifyAddedText(text: String, style: TextViewStyle, outlineColor: Int?) {
         val textHolder = editorAddedViews.mapNotNull {
             ((it as? ViewGroup)?.children?.first() as? ViewGroup)
-        }.first { (it.children.first() as? TextView)?.text == text }
+        }.firstOrNull { (it.children.first() as? TextView)?.text == text } ?: return
 
 
         outlineColor?.let {

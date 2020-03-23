@@ -47,4 +47,5 @@ dependencies {
     implementation 'com.squareup.picasso:picasso:2.71828'
     implementation 'com.github.yalantis:ucrop:2.2.4'
     implementation "dev.sasikanth:colorsheet:1.0.1"
+    implementation "com.github.skydoves:colorpickerpreference:2.0.0"
 }

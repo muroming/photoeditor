@@ -6,7 +6,9 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.core.graphics.drawable.toBitmap
 import androidx.core.net.toFile
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
@@ -20,6 +22,7 @@ import com.muroming.postcardeditor.listeners.OnCropFinishedListener
 import com.muroming.postcardeditor.listeners.OnImagePickedListener
 import com.muroming.postcardeditor.listeners.OnKeyboardShownListener
 import com.muroming.postcardeditor.ui.views.UserPicturesAdapter
+import com.muroming.postcardeditor.ui.views.colorpicker.ColorPicker
 import com.muroming.postcardeditor.ui.views.editorview.CropStarter
 import com.muroming.postcardeditor.ui.views.editorview.PicassoPhotoTarget
 import com.muroming.postcardeditor.utils.setVisibility
@@ -67,11 +70,7 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor),
         viewModel.observePresets().observe(this, ::updatePresets)
         viewModel.observeEditorState().observe(this, ::onEditorStateChanged)
 
-        vPhotoEditor.apply {
-            fragmentManager = childFragmentManager
-            cropStarter = this@PhotoEditorFragment
-        }
-        vTextAddingView.fragmentManager = childFragmentManager
+        vPhotoEditor.cropStarter = this
         vTextAddingView.keyboardListener = this
         vUserPictures.onUserPictureClicked = ::onUserPictureClicked
     }
@@ -124,13 +123,28 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor),
                 viewModel.onFinishedEditing()
             }
         }
-        ivAllPictures.setOnClickListener {
+        ivPicture.setOnClickListener {
             Intent(
                 Intent.ACTION_PICK,
                 android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI
             ).let {
                 activity?.startActivityForResult(it, RESULT_PICK_IMAGE)
             }
+        }
+        ivAllPictures.setOnClickListener {
+            viewModel.onAllPicturesClicked()
+        }
+        ivWallBrush.setOnClickListener {
+            val context = requireContext()
+            ColorPicker(context) { newColor ->
+                val fillDrawable = ContextCompat.getDrawable(
+                    context,
+                    R.drawable.fill_blue
+                ) ?: return@ColorPicker
+
+                fillDrawable.setTint(newColor)
+                openEditor(fillDrawable.toBitmap())
+            }.show()
         }
     }
 

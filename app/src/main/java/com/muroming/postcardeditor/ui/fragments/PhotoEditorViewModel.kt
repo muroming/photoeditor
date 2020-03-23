@@ -94,4 +94,8 @@ class PhotoEditorViewModel : ViewModel() {
         editorState.value = EditorState.FRAME_PRESETS
         reloadPresets()
     }
+
+    fun onAllPicturesClicked() {
+        userPictures.value?.let { presets.value = CardPresets.Loaded(it) }
+    }
 }
