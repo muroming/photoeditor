@@ -198,6 +198,10 @@ class TextAddingView @JvmOverloads constructor(
         }
         vTypefacesSpinner.setSelection(0)
         intervalsGroup.setVisibility(false)
+
+        if (!isVisible) {
+            etTextInput.setTextColor(ContextCompat.getColor(context, R.color.black))
+        }
     }
 
     fun setTextColor(color: Int) {
