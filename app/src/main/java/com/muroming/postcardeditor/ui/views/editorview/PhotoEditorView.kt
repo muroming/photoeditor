@@ -6,7 +6,10 @@ import android.graphics.Color
 import android.graphics.Typeface
 import android.util.AttributeSet
 import android.util.TypedValue
-import android.view.*
+import android.view.Gravity
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.SeekBar
@@ -54,6 +57,11 @@ class PhotoEditorView @JvmOverloads constructor(
     private lateinit var colorPalette: IntArray
     private var selectedColor = -1
 
+    private var currentSelectedText: View? = null
+
+    private val minRotateAngle = 0
+    private val maxRotateAngle = 360
+
     private val editorActions: Map<Int, (ImageView) -> Unit> = mapOf(
         R.drawable.ic_add_text to ::onAddTextClicked,
         R.drawable.ic_palette to ::onPaletteClicked,
@@ -76,21 +84,22 @@ class PhotoEditorView @JvmOverloads constructor(
         photoEditorView.source.setImageBitmap(image)
         initActions()
         initColorPalette()
-        photoEditorView.setOnTouchListener { _, event ->
-            val applyDrawing = event.action == MotionEvent.ACTION_UP
-            if (applyDrawing) {
-                photoEditor.setBrushDrawingMode(false)
-                photoEditor.setBrushDrawingMode(isDrawing)
-                if (isErasing) {
-                    photoEditor.brushEraser()
-                }
-            }
-            applyDrawing
-        }
     }
 
     fun setCroppedImage(bitmap: Bitmap) {
         photoEditorView.source.setImageBitmap(bitmap)
+    }
+
+    private fun animateBrushSliderAlpha(alpha: Float) {
+        vBrushSlider.animate().alpha(alpha).setDuration(BRUSH_SIZE_ANIMATION_DURATION).start()
+    }
+
+    private fun applyDrawings() {
+        photoEditor.setBrushDrawingMode(false)
+        photoEditor.setBrushDrawingMode(isDrawing || isErasing)
+        if (isErasing) {
+            photoEditor.brushEraser()
+        }
     }
 
     private fun initActions() {
@@ -144,6 +153,11 @@ class PhotoEditorView @JvmOverloads constructor(
         photoEditor.brushSize = minBrushSize.toFloat()
         photoEditor.brushColor = Color.parseColor("#ff0000")
         photoEditor.setBrushDrawingMode(false)
+        photoEditor.setOnPhotoEditorListener(DrawingListener(
+            onDrawingStated = { animateBrushSliderAlpha(0f) },
+            onDrawingStopped = { animateBrushSliderAlpha(1f) },
+            applyChanges = ::applyDrawings
+        ))
 
         vBrushSlider.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
@@ -174,6 +188,20 @@ class PhotoEditorView @JvmOverloads constructor(
                     .start()
             }
         })
+
+
+        vRotateSlider.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                seekBar?.takeIf { fromUser }?.let {
+                    val newRotation = minRotateAngle + (progress.toFloat() / 100) * (maxRotateAngle - minRotateAngle)
+                    currentSelectedText?.rotation = newRotation
+                }
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+        })
     }
 
     fun clearEditor() {
@@ -187,10 +215,13 @@ class PhotoEditorView @JvmOverloads constructor(
         isErasing = false
         isDrawing = false
         vTextAddingView.setInputTextGroupVisibility(false)
+        vTextAddingView.resetColor()
+        hideRotating()
     }
 
     fun saveImage(filepath: String, onSuccess: (Boolean) -> Unit) {
         hideAllEditButtons()
+        applyDrawings()
         photoEditor.saveAsFile(
             filepath,
             PhotoSaveListener({ onSuccess(true) }, { onSuccess(false) })
@@ -198,6 +229,7 @@ class PhotoEditorView @JvmOverloads constructor(
     }
 
     private fun onAddTextClicked(view: ImageView) {
+        hideRotating()
         vTextAddingView.setInputTextGroupVisibility(true)
         vBrushSlider.setVisibility(false)
     }
@@ -220,6 +252,7 @@ class PhotoEditorView @JvmOverloads constructor(
     }
 
     private fun onCropClicked(view: ImageView) {
+        applyDrawings()
         pbCropLoading.setVisibility(true)
         hideAllEditButtons()
         photoEditor.saveAsFile(getTempSrcPath(), PhotoSaveListener(
@@ -301,10 +334,10 @@ class PhotoEditorView @JvmOverloads constructor(
         }
 
         (textHolder.getChildAt(0) as TextView).applyStyle(style)
+        (textHolder.parent as View).rotation = style.rotation
 
         (textHolder.parent as? ViewGroup)?.let { holderParent ->
             val deleteImage = (holderParent.children.first { it is ImageView })
-
             val deleteImageParams = deleteImage.layoutParams as FrameLayout.LayoutParams
 
             val editImage = ImageView(context).apply {
@@ -315,16 +348,36 @@ class PhotoEditorView @JvmOverloads constructor(
                 }
                 setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_edit))
             }
+
+            val rotateImage = ImageView(context).apply {
+                layoutParams = FrameLayout.LayoutParams(0, 0).apply {
+                    width = deleteImageParams.width
+                    height = deleteImageParams.height
+                    gravity = Gravity.END or Gravity.BOTTOM
+                }
+                setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_rotate))
+            }
             deleteImage.viewTreeObserver.addOnGlobalLayoutListener {
                 editImage.visibility = deleteImage.visibility
+                rotateImage.visibility = deleteImage.visibility
             }
             editImage.setOnClickListener {
                 photoEditorView.removeView(holderParent)
+                hideRotating()
                 editorAddedViews.remove(holderParent)
                 vTextAddingView.editText(textHolder, style)
             }
+            rotateImage.setOnClickListener {
+                currentSelectedText = textHolder.parent as View
+                val currentRotation = currentSelectedText?.let {
+                    it.rotation / maxRotateAngle * 100
+                }?.toInt() ?: 0
+                vRotateSlider.progress = currentRotation
+                vRotate.setVisibility(true)
+            }
 
             holderParent.addView(editImage)
+            holderParent.addView(rotateImage)
         }
     }
 
@@ -335,6 +388,11 @@ class PhotoEditorView @JvmOverloads constructor(
             .forEach {
                 it.setVisibility(false)
             }
+    }
+
+    private fun hideRotating() {
+        currentSelectedText = null
+        vRotate.setVisibility(false)
     }
 
     private fun copyTextWithOutline(textView: TextView, outlineColor: Int) =
@@ -353,8 +411,12 @@ class PhotoEditorView @JvmOverloads constructor(
         }
 
     override fun onBackPressed(): Boolean {
-        val intercepting = isDrawing || isErasing || vTextAddingView.isVisible
+        applyDrawings()
+        val intercepting = isDrawing || isErasing
+                || vTextAddingView.isVisible
+                || currentSelectedText != null
         when {
+            currentSelectedText != null -> hideRotating()
             isDrawing -> onBrushClicked(null)
             isErasing -> onEraserClicked(null)
             vTextAddingView.isVisible -> vTextAddingView.onBackPressed()

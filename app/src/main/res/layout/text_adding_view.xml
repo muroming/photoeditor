@@ -18,10 +18,14 @@
         android:layout_height="wrap_content"
         android:background="@null"
         android:minWidth="200dp"
-        android:textSize="@dimen/min_text_size"
-        app:layout_constraintBottom_toBottomOf="@id/vInputTextBackground"
+        android:textSize="@dimen/default_text_size"
+        android:inputType="textMultiLine"
+        app:layout_constraintVertical_bias=".3"
+        app:layout_constraintBottom_toTopOf="@id/tvTextHeight"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        android:maxLength="600"
+        android:maxLines="10"
         app:layout_constraintTop_toTopOf="@id/vInputTextBackground"
         tools:text="Demo text" />
 

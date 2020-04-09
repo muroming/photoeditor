@@ -15,12 +15,14 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.observe
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.muroming.postcardeditor.R
-import com.muroming.postcardeditor.data.dto.UserPicture
 import com.muroming.postcardeditor.listeners.OnBackPressedListener
 import com.muroming.postcardeditor.listeners.OnCropFinishedListener
 import com.muroming.postcardeditor.listeners.OnImagePickedListener
 import com.muroming.postcardeditor.listeners.OnKeyboardShownListener
+import com.muroming.postcardeditor.ui.themedadapter.ThemedUserPictures
+import com.muroming.postcardeditor.ui.themedadapter.UserThemedPicturesAdapter
 import com.muroming.postcardeditor.ui.views.UserPicturesAdapter
 import com.muroming.postcardeditor.ui.views.colorpicker.ColorPicker
 import com.muroming.postcardeditor.ui.views.editorview.CropStarter
@@ -53,6 +55,14 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor),
         )
     }
 
+    private val themedAdapter: UserThemedPicturesAdapter by lazy {
+        UserThemedPicturesAdapter(
+            requireContext(),
+            ::onPresetUriClicked,
+            ::openAllThemes
+        )
+    }
+
     override fun onResume() {
         super.onResume()
         clearTempFiles()
@@ -63,11 +73,13 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor),
         initPresetsRecycler()
         initListeners()
 
-        viewModel.loadUserPictures(requireContext().filesDir)
+        viewModel.initPresetsRepo(requireContext().filesDir)
+        viewModel.loadUserPictures()
         viewModel.observeUserPictures().observe(this, vUserPictures::update)
+        viewModel.observePresets().observe(this, presetsAdapter::setItems)
 
         viewModel.reloadPresets()
-        viewModel.observePresets().observe(this, ::updatePresets)
+        viewModel.observeThemedPresets().observe(this, ::updateThemedPresets)
         viewModel.observeEditorState().observe(this, ::onEditorStateChanged)
 
         vPhotoEditor.cropStarter = this
@@ -79,6 +91,10 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor),
         rvPresets.apply {
             layoutManager = GridLayoutManager(requireContext(), 3)
             adapter = presetsAdapter
+        }
+        rvThemedPresets.apply {
+            layoutManager = LinearLayoutManager(requireContext())
+            adapter = themedAdapter
         }
     }
 
@@ -113,9 +129,28 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor),
         }
         ivFill.setOnClickListener {
             viewModel.onFillClicked(requireContext().resources)
+            ivCurrentState.setImageDrawable(ivFill.drawable)
+            tvCurrentState.setText(R.string.fills)
         }
-        ivMultiply.setOnClickListener {
+        ivFrames.setOnClickListener {
+            viewModel.onFramesClicked()
+            ivCurrentState.setImageDrawable(
+                ContextCompat.getDrawable(
+                    requireContext(),
+                    R.drawable.ic_frames
+                )
+            )
+            tvCurrentState.setText(R.string.frames)
+        }
+        ivHeaderPresets.setOnClickListener {
             viewModel.onPresetsClicked()
+            ivCurrentState.setImageDrawable(
+                ContextCompat.getDrawable(
+                    requireContext(),
+                    R.drawable.ic_presets
+                )
+            )
+            tvCurrentState.setText(R.string.presets)
         }
         ivDelete.setOnClickListener {
             currentFile?.takeIf(File::exists)?.let {
@@ -148,11 +183,11 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor),
         }
     }
 
-    private fun updatePresets(presets: CardPresets) {
+    private fun updateThemedPresets(presets: CardPresets) {
         when (presets) {
             is CardPresets.Loading -> showPresetsLoading()
             is CardPresets.Error -> showPresetsError()
-            is CardPresets.Loaded -> showPresets(presets.presets)
+            is CardPresets.Loaded -> showThemedPresets(presets.presets)
         }
     }
 
@@ -168,10 +203,10 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor),
         pbLoadingPresets.setVisibility(false)
     }
 
-    private fun showPresets(presets: List<UserPicture>) {
-        presetsAdapter.setItems(presets)
-        presetsAdapter.notifyDataSetChanged()
-        rvPresets.setVisibility(true)
+    private fun showThemedPresets(presets: List<ThemedUserPictures>) {
+        themedAdapter.setItems(presets)
+        rvThemedPresets.setVisibility(true)
+        rvPresets.setVisibility(false)
         errorGroup.setVisibility(false)
         pbLoadingPresets.setVisibility(false)
     }
@@ -180,7 +215,7 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor),
         Picasso.get()
             .load(uri)
             .into(PicassoPhotoTarget { bitmap ->
-                currentFile = uri.takeIf { uri.scheme == "file"}?.toFile()
+                currentFile = uri.takeIf { uri.scheme == "file" }?.toFile()
                 openEditor(bitmap)
             })
     }
@@ -203,6 +238,7 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor),
 
     private fun showEditor() {
         rvPresets.setVisibility(false)
+        rvThemedPresets.setVisibility(false)
         mockIcons.visibility = View.INVISIBLE
         editorMockIcons.setVisibility(true)
         vPhotoEditor.setVisibility(true)
@@ -212,9 +248,22 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor),
     private fun showPresets() {
         vPhotoEditor.clearEditor()
         currentFile = null
-        viewModel.loadUserPictures(requireContext().filesDir)
+        viewModel.loadUserPictures()
 
+        rvThemedPresets.setVisibility(false)
         rvPresets.setVisibility(true)
+        mockIcons.setVisibility(true)
+        editorMockIcons.setVisibility(false)
+        vPhotoEditor.setVisibility(false)
+    }
+
+    private fun showThemedPresets() {
+        vPhotoEditor.clearEditor()
+        currentFile = null
+        viewModel.loadUserPictures()
+
+        rvThemedPresets.setVisibility(true)
+        rvPresets.setVisibility(false)
         mockIcons.setVisibility(true)
         editorMockIcons.setVisibility(false)
         vPhotoEditor.setVisibility(false)
@@ -225,6 +274,10 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor),
             onSavePicture = { saveEditedPicture { viewModel.onSavingComplete() } },
             onNotSavingPicture = { viewModel.onFinishedEditing() }
         ).show(childFragmentManager, SavePictureDialog.DIALOG_TAG)
+    }
+
+    private fun openAllThemes(theme: String) {
+        viewModel.onOpenThemesClicked(theme)
     }
 
     private fun saveEditedPicture(onSaved: () -> Unit) {
@@ -239,7 +292,10 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor),
 
     private fun onEditorStateChanged(editorState: EditorState) {
         when (editorState) {
+            EditorState.FILL_PRESETS,
+            EditorState.USER_PICTURES,
             EditorState.FRAME_PRESETS -> showPresets()
+            EditorState.THEMED_PRESETS -> showThemedPresets()
             EditorState.EDITING -> showEditor()
         }
     }
@@ -277,6 +333,10 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor),
             }
             true
         }
+        EditorState.FRAME_PRESETS -> {
+            viewModel.showThemedPresets()
+            true
+        }
         else -> false
     }
 
@@ -288,15 +348,17 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor),
     override fun onKeyboardVisible() {
         editorMockIcons.setVisibility(false)
         vUserPictures.setVisibility(false)
-        ivPresets.setVisibility(false)
-        tvPresets.setVisibility(false)
+        ivCurrentState.setVisibility(false)
+        tvCurrentState.setVisibility(false)
     }
 
     override fun onKeyboardHidden() {
-        editorMockIcons.setVisibility(true)
+        editorMockIcons.takeIf {
+            viewModel.getEditorState() == EditorState.EDITING
+        }?.setVisibility(true)
         vUserPictures.setVisibility(true)
-        ivPresets.setVisibility(true)
-        tvPresets.setVisibility(true)
+        ivCurrentState.setVisibility(true)
+        tvCurrentState.setVisibility(true)
     }
 
     companion object {

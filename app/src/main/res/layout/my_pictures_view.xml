@@ -29,8 +29,8 @@
 
     <ImageView
         android:id="@+id/ivAllPictures"
-        android:layout_width="@dimen/medium_icon_size"
-        android:layout_height="@dimen/medium_icon_size"
+        android:layout_width="@dimen/small_icon_size"
+        android:layout_height="@dimen/small_icon_size"
         android:layout_alignParentEnd="true"
         android:src="@drawable/ic_open_file" />
 

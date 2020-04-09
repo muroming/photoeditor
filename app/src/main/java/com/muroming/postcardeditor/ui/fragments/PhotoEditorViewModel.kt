@@ -2,7 +2,6 @@ package com.muroming.postcardeditor.ui.fragments
 
 import android.content.res.Resources
 import android.graphics.drawable.GradientDrawable
-import androidx.core.net.toUri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -10,39 +9,58 @@ import androidx.lifecycle.viewModelScope
 import com.muroming.postcardeditor.R
 import com.muroming.postcardeditor.data.PresetsRepository
 import com.muroming.postcardeditor.data.dto.DrawablePicture
-import com.muroming.postcardeditor.data.dto.UriPicture
 import com.muroming.postcardeditor.data.dto.UserPicture
 import kotlinx.coroutines.launch
 import java.io.File
+import java.util.*
 
 class PhotoEditorViewModel : ViewModel() {
-    private val presetsRepository = PresetsRepository()
+    private lateinit var presetsRepository: PresetsRepository
 
+    private val presets = MutableLiveData<List<UserPicture>>()
     private val userPictures = MutableLiveData<List<UserPicture>>()
-    private val presets = MutableLiveData<CardPresets>(CardPresets.Loading)
-    private val editorState = MutableLiveData<EditorState>(EditorState.FRAME_PRESETS)
+    private val themedPresets = MutableLiveData<CardPresets>(CardPresets.Loading)
+    private val editorState = MutableLiveData<EditorState>(EditorState.THEMED_PRESETS)
+
+    private var presetsState = EditorState.FRAME_PRESETS
 
     fun observeUserPictures(): LiveData<List<UserPicture>> = userPictures
-    fun observePresets(): LiveData<CardPresets> = presets
+    fun observeThemedPresets(): LiveData<CardPresets> = themedPresets
     fun observeEditorState(): LiveData<EditorState> = editorState
+    fun observePresets(): LiveData<List<UserPicture>> = presets
 
     fun getEditorState() = editorState.value
 
-    fun loadUserPictures(directory: File) = directory
-        .listFiles()
-        .filter { it.name.contains(".png") || it.name.contains(".jpg") }
-        .map {
-            UriPicture(it.toUri())
+    fun initPresetsRepo(directory: File) {
+        presetsRepository = PresetsRepository(directory)
+    }
+
+    fun loadUserPictures() {
+        presetsRepository.loadUserPictures().let {
+            userPictures.value = it
+            presets.takeIf {
+                presetsState == EditorState.USER_PICTURES || editorState.value == EditorState.USER_PICTURES
+            }?.value = it
         }
-        .let(userPictures::setValue)
+    }
 
     fun reloadPresets() {
         viewModelScope.launch {
-            presets.value = CardPresets.Loading
+            themedPresets.value = CardPresets.Loading
             try {
-                presets.value = CardPresets.Loaded(presetsRepository.loadPresets())
+                themedPresets.value = CardPresets.Loaded(presetsRepository.loadPresets())
             } catch (e: Exception) {
-                presets.value = CardPresets.Error
+                themedPresets.value = CardPresets.Error
+            }
+        }
+    }
+
+    private fun reloadFrames() {
+        viewModelScope.launch {
+            presets.value = emptyList()
+            try {
+                presets.value = presetsRepository.loadFrames()
+            } catch (ignored: Exception) {
             }
         }
     }
@@ -65,24 +83,25 @@ class PhotoEditorViewModel : ViewModel() {
                     resources.getDrawable(resId, null) as GradientDrawable
                 )
             }
-        presets.value = CardPresets.Loaded(fills)
+        presets.value = fills
     }
 
     fun onPresetClicked() {
+        editorState.value?.takeIf { it != EditorState.EDITING }?.let { presetsState = it }
         editorState.value = EditorState.EDITING
     }
 
     fun onSavingComplete() {
-        editorState.value = EditorState.FRAME_PRESETS
+        loadUserPictures()
+        editorState.value = presetsState
     }
 
     fun onFinishedEditing() {
-        editorState.value = EditorState.FRAME_PRESETS
+        editorState.value = presetsState
     }
 
     fun generateFilePath(directory: File): String {
-        val currentCount = directory.listFiles().size
-        return "${directory.path}/myPicture${currentCount}.png"
+        return "${directory.path}/myPicture${UUID.randomUUID()}.png"
     }
 
     fun onFillClicked(resources: Resources) {
@@ -95,7 +114,23 @@ class PhotoEditorViewModel : ViewModel() {
         reloadPresets()
     }
 
+    fun onFramesClicked() {
+        editorState.value = EditorState.FRAME_PRESETS
+        reloadFrames()
+    }
+
     fun onAllPicturesClicked() {
-        userPictures.value?.let { presets.value = CardPresets.Loaded(it) }
+        editorState.value = EditorState.USER_PICTURES
+    }
+
+    fun onOpenThemesClicked(theme: String) {
+        presets.value = (themedPresets.value as CardPresets.Loaded)
+            .presets
+            .first { it.title == theme }.pictures
+        editorState.value = EditorState.FRAME_PRESETS
+    }
+
+    fun showThemedPresets() {
+        editorState.value = EditorState.THEMED_PRESETS
     }
 }

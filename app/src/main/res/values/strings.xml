@@ -3,6 +3,8 @@
     <string name="my_pictures">Мои работы</string>
     <string name="all_pictures">Все</string>
     <string name="presets">Шаблоны</string>
+    <string name="frames">Рамки</string>
+    <string name="fills">Заливки</string>
     <string name="send_to">Отправить фото</string>
     <string name="error_loading_presets">Не удалось загрузить шаблоны, попробуйте ещё раз</string>
     <string name="reload">Перезагрузить</string>

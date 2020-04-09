@@ -2,13 +2,14 @@
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:animateLayoutChanges="true"
     tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout">
 
     <ja.burhanrashid52.photoeditor.PhotoEditorView
         android:id="@+id/photoEditorView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toTopOf="@id/glEditorActions"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -54,6 +55,37 @@
         android:thumbTint="@color/white"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@id/glEditorActions" />
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/vRotate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:constraint_referenced_ids="ivRotate,vRotateSlider" />
+
+    <ImageView
+        android:id="@+id/ivRotate"
+        android:layout_width="@dimen/small_icon_size"
+        android:layout_height="@dimen/small_icon_size"
+        android:layout_marginStart="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="@color/dark_blue"
+        android:src="@drawable/ic_rotate"
+        app:layout_constraintBottom_toBottomOf="@id/glEditorActions"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <SeekBar
+        android:id="@+id/vRotateSlider"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/small_icon_size"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="@color/dark_blue"
+        android:progressTint="@color/white"
+        android:thumbTint="@color/white"
+        app:layout_constraintBottom_toBottomOf="@id/glEditorActions"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/ivRotate" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/glEditorActions"

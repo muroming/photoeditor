@@ -119,8 +119,16 @@ class TextAddingView @JvmOverloads constructor(
                 etTextInput.currentTextColor,
                 if (isTextOutlined) selectedOutlineColor else null,
                 etTextInput.typeface,
-                TextViewStyle(currentTypeface, isTextBold, isTextItalic, etTextInput.lineSpacingMultiplier, etTextInput.letterSpacing)
+                TextViewStyle(
+                    currentTypeface,
+                    isTextBold,
+                    isTextItalic,
+                    etTextInput.lineSpacingMultiplier,
+                    etTextInput.letterSpacing,
+                    (etTextInput.tag as? Float) ?: 0f
+                )
             )
+            etTextInput.tag = null
         }
         vTextSizeSlider.setOnSeekBarChangeListener(
             SeekBarListener(
@@ -149,7 +157,7 @@ class TextAddingView @JvmOverloads constructor(
     }
 
     private fun selectOutlineColor() {
-        ColorPicker(context){ newColor ->
+        ColorPicker(context) { newColor ->
             selectedOutlineColor = newColor
             setInputTextOutlined()
         }.show()
@@ -198,10 +206,6 @@ class TextAddingView @JvmOverloads constructor(
         }
         vTypefacesSpinner.setSelection(0)
         intervalsGroup.setVisibility(false)
-
-        if (!isVisible) {
-            etTextInput.setTextColor(ContextCompat.getColor(context, R.color.black))
-        }
     }
 
     fun setTextColor(color: Int) {
@@ -219,9 +223,17 @@ class TextAddingView @JvmOverloads constructor(
                 etTextInput.currentTextColor,
                 if (isTextOutlined) selectedOutlineColor else null,
                 etTextInput.typeface,
-                TextViewStyle(currentTypeface, isTextBold, isTextItalic, etTextInput.lineSpacingMultiplier, etTextInput.letterSpacing)
+                TextViewStyle(
+                    currentTypeface,
+                    isTextBold,
+                    isTextItalic,
+                    etTextInput.lineSpacingMultiplier,
+                    etTextInput.letterSpacing,
+                    etTextInput.tag as Float
+                )
             )
         }
+        etTextInput.tag = null
     }
 
     private fun EditText.manageFocusWithKeyboard(shouldRequestFocus: Boolean) {
@@ -245,7 +257,8 @@ class TextAddingView @JvmOverloads constructor(
     private fun EditText.resetInputText() {
         setText("")
         textSize = minTextSize
-        scaleY = 1f
+        setLineSpacing(0f, 1f)
+        textSize = resources.getDimensionPixelSize(R.dimen.default_text_size).toFloat()
         letterSpacing = 0f
         gravity = Gravity.START
         etTextInput.setTextColor(0)
@@ -259,6 +272,10 @@ class TextAddingView @JvmOverloads constructor(
         setSlidersValues()
     }
 
+    fun resetColor() {
+        etTextInput.setTextColor(ContextCompat.getColor(context, R.color.black))
+    }
+
     fun editText(textHolder: ViewGroup, textStyle: TextViewStyle) {
         setInputTextGroupVisibility(true)
         val textView = textHolder.children.first() as TextView
@@ -266,9 +283,11 @@ class TextAddingView @JvmOverloads constructor(
 
         etTextInput.apply {
             setText(textView.text)
+            setTextColor(textView.currentTextColor)
             textSize = textView.textSize.toSp()
             gravity = textView.gravity
             applyStyle(textStyle)
+            tag = (textHolder.parent as View).rotation
             if (textView is OutlinedText) {
                 isTextOutlined = true
                 selectedOutlineColor = textView.strokeColor
@@ -292,9 +311,12 @@ class TextAddingView @JvmOverloads constructor(
     }
 
     private fun setSlidersValues() {
-        val textSizeValue = (etTextInput.textSize.toSp() - minTextSize) / (maxTextSize - minTextSize) * 100
-        val spacingValue = (etTextInput.letterSpacing - minTextSpacing) / (maxTextSpacing - minTextSpacing) * 100
-        val scaleYValue = (etTextInput.lineSpacingMultiplier - minTextHeightScale) / (maxTextHeightScale - minTextHeightScale) * 100
+        val textSizeValue =
+            (etTextInput.textSize.toSp() - minTextSize) / (maxTextSize - minTextSize) * 100
+        val spacingValue =
+            (etTextInput.letterSpacing - minTextSpacing) / (maxTextSpacing - minTextSpacing) * 100
+        val scaleYValue =
+            (etTextInput.lineSpacingMultiplier - minTextHeightScale) / (maxTextHeightScale - minTextHeightScale) * 100
 
         vTextSizeSlider.progress = textSizeValue.toInt()
         vSpacingSlider.progress = spacingValue.toInt()

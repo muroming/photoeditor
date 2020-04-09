@@ -10,19 +10,19 @@
 
     <ImageView
         android:id="@+id/ivBack"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_width="@dimen/small_icon_size"
+        android:layout_height="@dimen/small_icon_size"
         android:layout_marginEnd="4dp"
+        app:layout_constraintHorizontal_chainStyle="spread_inside"
         android:src="@drawable/ic_back"
-        app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintEnd_toStartOf="@id/ivSearch"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
         android:id="@+id/ivSearch"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_width="@dimen/small_icon_size"
+        android:layout_height="@dimen/small_icon_size"
         android:layout_marginEnd="4dp"
         android:src="@drawable/ic_search"
         app:layout_constraintDimensionRatio="1:1"
@@ -32,65 +32,59 @@
 
     <ImageView
         android:id="@+id/ivHeaderPresets"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_width="@dimen/small_icon_size"
+        android:layout_height="@dimen/small_icon_size"
         android:layout_marginEnd="4dp"
         android:src="@drawable/ic_presets"
-        app:layout_constraintDimensionRatio="1:1"
-        app:layout_constraintEnd_toStartOf="@+id/ivMultiply"
+        app:layout_constraintEnd_toStartOf="@+id/ivFrames"
         app:layout_constraintStart_toEndOf="@+id/ivSearch"
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
-        android:id="@+id/ivMultiply"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:id="@+id/ivFrames"
+        android:layout_width="@dimen/small_icon_size"
+        android:layout_height="@dimen/small_icon_size"
         android:layout_marginEnd="4dp"
-        android:src="@drawable/ic_multiple"
-        app:layout_constraintDimensionRatio="1:1"
+        android:src="@drawable/ic_frames"
         app:layout_constraintEnd_toStartOf="@+id/ivWallBrush"
         app:layout_constraintStart_toEndOf="@+id/ivHeaderPresets"
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
         android:id="@+id/ivWallBrush"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_width="@dimen/small_icon_size"
+        android:layout_height="@dimen/small_icon_size"
         android:layout_marginEnd="4dp"
         android:src="@drawable/ic_wall_brush"
-        app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintEnd_toStartOf="@+id/ivFill"
-        app:layout_constraintStart_toEndOf="@+id/ivMultiply"
+        app:layout_constraintStart_toEndOf="@+id/ivFrames"
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
         android:id="@+id/ivFill"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_width="@dimen/small_icon_size"
+        android:layout_height="@dimen/small_icon_size"
         android:layout_marginEnd="4dp"
         android:src="@drawable/ic_fill"
-        app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintEnd_toStartOf="@+id/ivPicture"
         app:layout_constraintStart_toEndOf="@+id/ivWallBrush"
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
         android:id="@+id/ivPicture"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_width="@dimen/small_icon_size"
+        android:layout_height="@dimen/small_icon_size"
         android:layout_marginEnd="4dp"
         android:src="@drawable/ic_picture"
-        app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintEnd_toStartOf="@+id/ivCamera"
         app:layout_constraintStart_toEndOf="@+id/ivFill"
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
         android:id="@+id/ivCamera"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_width="@dimen/small_icon_size"
+        android:layout_height="@dimen/small_icon_size"
         android:src="@drawable/ic_camera"
-        app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/ivPicture"
         app:layout_constraintTop_toTopOf="parent" />
@@ -122,7 +116,7 @@
         android:id="@+id/mockIcons"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:constraint_referenced_ids="ivSearch,ivHeaderPresets,ivMultiply,ivWallBrush,ivFill,ivPicture,ivCamera" />
+        app:constraint_referenced_ids="ivSearch,ivHeaderPresets,ivFrames,ivWallBrush,ivFill,ivPicture,ivCamera" />
 
     <androidx.constraintlayout.widget.Group
         android:id="@+id/editorMockIcons"
@@ -140,7 +134,7 @@
         app:layout_constraintTop_toBottomOf="@id/ivCamera" />
 
     <ImageView
-        android:id="@+id/ivPresets"
+        android:id="@+id/ivCurrentState"
         android:layout_width="@dimen/medium_icon_size"
         android:layout_height="@dimen/medium_icon_size"
         android:layout_marginTop="6dp"
@@ -149,16 +143,16 @@
         app:layout_constraintTop_toBottomOf="@id/vUserPictures" />
 
     <TextView
-        android:id="@+id/tvPresets"
+        android:id="@+id/tvCurrentState"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:text="@string/presets"
         android:textColor="@color/black"
         android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="@id/ivPresets"
-        app:layout_constraintStart_toEndOf="@id/ivPresets"
-        app:layout_constraintTop_toTopOf="@id/ivPresets"
+        app:layout_constraintBottom_toBottomOf="@id/ivCurrentState"
+        app:layout_constraintStart_toEndOf="@id/ivCurrentState"
+        app:layout_constraintTop_toTopOf="@id/ivCurrentState"
         app:layout_constraintVertical_bias="0.7" />
 
     <androidx.recyclerview.widget.RecyclerView
@@ -169,7 +163,17 @@
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/ivPresets" />
+        app:layout_constraintTop_toBottomOf="@id/ivCurrentState" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvThemedPresets"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="6dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/ivCurrentState" />
 
     <ProgressBar
         android:id="@+id/pbLoadingPresets"
@@ -178,7 +182,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/ivPresets" />
+        app:layout_constraintTop_toBottomOf="@id/ivCurrentState" />
 
     <TextView
         android:id="@+id/tvLoadingError"
@@ -191,7 +195,7 @@
         app:layout_constraintBottom_toTopOf="@id/btnReloadPresets"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/ivPresets"
+        app:layout_constraintTop_toBottomOf="@id/ivCurrentState"
         app:layout_constraintVertical_chainStyle="packed" />
 
     <Button
@@ -220,9 +224,8 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="6dp"
-        android:layout_marginBottom="16dp"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/ivPresets" />
+        app:layout_constraintTop_toBottomOf="@id/ivCurrentState" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

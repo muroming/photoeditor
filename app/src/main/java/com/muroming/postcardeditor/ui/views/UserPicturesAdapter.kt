@@ -41,6 +41,7 @@ class UserPicturesAdapter(
             clear()
             addAll(newItems)
         }
+        notifyDataSetChanged()
     }
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {

@@ -37,7 +37,6 @@ class UserPicturesView @JvmOverloads constructor(
 
     fun update(pictures: List<UserPicture>) {
         userPicturesAdapter.setItems(pictures)
-        userPicturesAdapter.notifyDataSetChanged()
     }
 
     private fun onPictureClicked(uri: Uri) {
