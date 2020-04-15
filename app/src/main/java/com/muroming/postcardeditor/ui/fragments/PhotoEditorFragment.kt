@@ -333,6 +333,7 @@ class PhotoEditorFragment : Fragment(R.layout.fragment_editor),
             }
             true
         }
+        EditorState.USER_PICTURES,
         EditorState.FRAME_PRESETS -> {
             viewModel.showThemedPresets()
             true
