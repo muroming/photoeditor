@@ -215,7 +215,6 @@ class PhotoEditorView @JvmOverloads constructor(
         isErasing = false
         isDrawing = false
         vTextAddingView.setInputTextGroupVisibility(false)
-        vTextAddingView.resetColor()
         hideRotating()
     }
 

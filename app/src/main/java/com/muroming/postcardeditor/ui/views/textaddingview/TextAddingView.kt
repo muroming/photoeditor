@@ -261,7 +261,7 @@ class TextAddingView @JvmOverloads constructor(
         textSize = resources.getDimensionPixelSize(R.dimen.default_text_size).toFloat()
         letterSpacing = 0f
         gravity = Gravity.START
-        etTextInput.setTextColor(0)
+        etTextInput.setTextColor(ContextCompat.getColor(context, R.color.black))
         etTextInput.setShadowLayer(0f, 0f, 0f, 0)
         currentTypeface = null
         editedTextHolder = null
@@ -270,10 +270,6 @@ class TextAddingView @JvmOverloads constructor(
         isTextOutlined = false
         setTypeface(null, Typeface.NORMAL)
         setSlidersValues()
-    }
-
-    fun resetColor() {
-        etTextInput.setTextColor(ContextCompat.getColor(context, R.color.black))
     }
 
     fun editText(textHolder: ViewGroup, textStyle: TextViewStyle) {
