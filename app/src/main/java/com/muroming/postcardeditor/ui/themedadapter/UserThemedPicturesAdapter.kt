@@ -46,12 +46,16 @@ class UserThemedPicturesAdapter(
             with(itemView as ViewGroup) {
                 tvTitle.text = userPicture.title
                 children.filterIsInstance<ImageView>().forEachIndexed { index, view ->
-                    if (index >= userPicture.pictures.size) return@forEachIndexed
-                    val photo = userPicture.pictures[index] as UriPicture
-                    Picasso.get()
-                        .load(photo.uri)
-                        .into(view)
-                    view.setOnClickListener { onUriClicked(photo.uri) }
+                    if (index >= userPicture.pictures.size) {
+                        view.setImageBitmap(null)
+                        view.setOnClickListener(null)
+                    } else {
+                        val photo = userPicture.pictures[index] as UriPicture
+                        Picasso.get()
+                            .load(photo.uri)
+                            .into(view)
+                        view.setOnClickListener { onUriClicked(photo.uri) }
+                    }
                 }
                 tvAll.setOnClickListener { onAllClicked(userPicture.title) }
             }
