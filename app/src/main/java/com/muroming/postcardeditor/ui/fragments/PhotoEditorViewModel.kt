@@ -1,6 +1,7 @@
 package com.muroming.postcardeditor.ui.fragments
 
 import android.content.res.Resources
+import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -20,7 +21,7 @@ class PhotoEditorViewModel : ViewModel() {
     private val presets = MutableLiveData<List<UserPicture>>()
     private val userPictures = MutableLiveData<List<UserPicture>>()
     private val themedPresets = MutableLiveData<CardPresets>(CardPresets.Loading)
-    private val editorState = MutableLiveData<EditorState>(EditorState.THEMED_PRESETS)
+    private val editorState = MutableLiveData(EditorState.THEMED_PRESETS)
 
     private var presetsState = EditorState.FRAME_PRESETS
 
@@ -83,6 +84,17 @@ class PhotoEditorViewModel : ViewModel() {
                     resources.getDrawable(resId, null) as GradientDrawable
                 )
             }
+        viewModelScope.launch {
+            val loadedFills = presetsRepository
+                .loadFillColors()
+                .map { color ->
+                    DrawablePicture(
+                        resources.getDrawable(R.drawable.fill_blue, null) as GradientDrawable,
+                        Color.parseColor(color)
+                    )
+                }
+            presets.value = fills + loadedFills
+        }
         presets.value = fills
     }
 

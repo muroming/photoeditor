@@ -10,5 +10,6 @@ data class UriPicture(
 ) : UserPicture()
 
 data class DrawablePicture(
-    val gradientDrawable: GradientDrawable
+    val gradientDrawable: GradientDrawable,
+    val tint: Int? = null
 ) : UserPicture()

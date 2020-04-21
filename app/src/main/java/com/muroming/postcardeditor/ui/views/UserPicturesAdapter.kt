@@ -53,7 +53,9 @@ class UserPicturesAdapter(
                         .into(ivUserPicture)
                     setOnClickListener { onUriClicked(userPicture.uri) }
                 } else if (userPicture is DrawablePicture) {
-                    val bitmap = userPicture.gradientDrawable.toBitmap()
+                    val bitmap = userPicture.gradientDrawable.also {
+                        userPicture.tint?.let(it::setColor)
+                    }.toBitmap()
                     ivUserPicture.setImageBitmap(bitmap)
                     setOnClickListener { onDrawableClicked(bitmap) }
                 }

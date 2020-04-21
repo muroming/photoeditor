@@ -43,6 +43,8 @@ class PresetsRepository(
             UriPicture(it.toUri())
         }
 
+    suspend fun loadFillColors() = presets.loadFillColors()
+
     companion object {
         private const val PRESETS_URL = "http://postcardz.pythonanywhere.com"
         private const val FRAMES_CATEGORY = "Рамки"

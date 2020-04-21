@@ -6,4 +6,7 @@ import retrofit2.http.GET
 interface PresetsApi {
     @GET("/frames")
     suspend fun loadPresets(): List<ApiPicture>
+
+    @GET("/fill_colors")
+    suspend fun loadFillColors(): List<String>
 }
